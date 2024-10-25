@@ -1,16 +1,20 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/meal_model.dart';
 import '../screens/recipe_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/favorites_service.dart';
+import '../widgets/common/cached_meal_image.dart';
 
 class FavoritesPage extends StatefulWidget {
+  const FavoritesPage({super.key});
+
   @override
   _FavoritesPageState createState() => _FavoritesPageState();
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
+  final FavoritesService _favoritesService = FavoritesService();
   List<Meal> favoriteMeals = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -19,12 +23,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
   }
 
   Future<void> _loadFavorites() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> favorites = prefs.getStringList('favorites') ?? [];
-
+    setState(() => isLoading = true);
+    final meals = await _favoritesService.getFavorites();
     setState(() {
-      favoriteMeals =
-          favorites.map((item) => Meal.fromJson(jsonDecode(item))).toList();
+      favoriteMeals = meals;
+      isLoading = false;
     });
   }
 
@@ -32,29 +35,39 @@ class _FavoritesPageState extends State<FavoritesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Favorite Recipes'),
+        title: const Text('Favorite Recipes'),
       ),
-      body: favoriteMeals.isEmpty
-          ? Center(child: Text('No favorite recipes yet'))
-          : ListView.builder(
-              itemCount: favoriteMeals.length,
-              itemBuilder: (context, index) {
-                final meal = favoriteMeals[index];
-                return ListTile(
-                  title: Text(meal.strMeal),
-                  leading: Image.network(meal.strMealThumb),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            RecipeDetail(mealName: meal.strMeal),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : favoriteMeals.isEmpty
+              ? const Center(child: Text('No favorite recipes yet'))
+              : ListView.builder(
+                  itemCount: favoriteMeals.length,
+                  itemBuilder: (context, index) {
+                    final meal = favoriteMeals[index];
+                    return ListTile(
+                      title: Text(meal.strMeal),
+                      leading: MealImage(
+                        mealId: meal.idMeal,
+                        imageUrl: meal.strMealThumb,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
                       ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RecipeDetail(
+                              mealName: meal.strMeal,
+                              mealId: meal.idMeal,
+                            ),
+                          ),
+                        ).then((_) => _loadFavorites());
+                      },
                     );
                   },
-                );
-              },
-            ),
+                ),
     );
   }
 }

@@ -108,11 +108,12 @@ class _ResultsPageState extends State<ResultsPage> {
         isLoading: _isLoading,
         hasMore: _hasMore,
         scrollController: _scrollController,
-        onMealSelected: (mealName) {
+        onMealSelected: (meal) {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RecipeDetail(mealName: mealName),
+              builder: (context) =>
+                  RecipeDetail(mealName: meal.strMeal, mealId: meal.idMeal),
             ),
           );
         },

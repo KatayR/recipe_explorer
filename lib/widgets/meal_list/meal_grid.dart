@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/models/meal_model.dart';
 import '/widgets/meal_list/meal_card.dart';
 import '../../utils/responsive_helper.dart';
 
 class MealGrid extends StatelessWidget {
   final List<dynamic> meals;
-  final Function(String) onMealSelected;
+  final Function(Meal) onMealSelected;
   final ScrollController? scrollController;
   final bool isLoading;
   final bool hasMore;
@@ -39,7 +40,7 @@ class MealGrid extends StatelessWidget {
 
         return MealCard(
           meal: meals[index],
-          onTap: () => onMealSelected(meals[index]['strMeal']),
+          onTap: () => onMealSelected(Meal.fromJson(meals[index])),
         );
       },
     );
