@@ -1,35 +1,37 @@
 import 'package:flutter/material.dart';
-import '../screens/results_page.dart';
 import '../models/category_model.dart';
 import '../screens/favorites_page.dart';
+import '../screens/recipe_page.dart';
+import '../screens/results_page.dart';
 import '../services/meals_service.dart';
-import '../widgets/categories_list.dart';
-import '../widgets/custom_search_bar.dart';
-import '../widgets/recipes_list.dart';
+import '../widgets/home/categories.dart';
+import '../widgets/home/custom_search_bar.dart';
+import '../widgets/meal_list/meal_grid.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
-  MealService _mealService = MealService();
+  final MealService _mealService = MealService();
   List<Category> _categories = [];
-  Future<List<dynamic>>? _chickenRecipesFuture;
 
-  void _searchMeals() async {
-    final results =
-        await _mealService.searchMealsByName(_searchController.text);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultsPage(
-          meals: results,
-          title: 'Search Results: ${_searchController.text}',
+  void _searchMeals() {
+    final query = _searchController.text.trim();
+    if (query.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultsPage(
+            searchQuery: query,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   void _loadCategories() async {
@@ -39,93 +41,94 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<List<dynamic>> _loadChickenRecipes() async {
-    final chickenRecipes = await _mealService.getMealsByCategory('Chicken');
-    return chickenRecipes;
+  void _onCategorySelected(String category) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultsPage(
+          categoryName: category,
+        ),
+      ),
+    );
   }
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
-    _chickenRecipesFuture = _loadChickenRecipes();
-  }
-
-  void _onCategorySelected(String category) async {
-    final meals = await _mealService.getMealsByCategory(category);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultsPage(
-          meals: meals,
-          title: category,
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Recipe Explorer'), actions: [
-        IconButton(
-          icon: Icon(Icons.favorite),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => FavoritesPage()),
-            );
-          },
-        ),
-      ]),
-      body: Column(
-        children: [
-          CustomSearchBar(
-            controller: _searchController,
-            onSearch: _searchMeals,
-          ),
-          CategoryList(
-            categories: _categories,
-            onCategorySelected: _onCategorySelected,
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Some chicken recipes',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: FutureBuilder<List<dynamic>>(
-                    future: _chickenRecipesFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(
-                            child:
-                                Text('Error loading default(chicken) recipes'));
-                      } else if (snapshot.hasData &&
-                          snapshot.data!.isNotEmpty) {
-                        return RecipeList(meals: snapshot.data!);
-                      } else {
-                        return Center(
-                            child: Text('No chicken recipes available'));
-                      }
-                    },
-                  ),
-                ),
-              ],
+        appBar: AppBar(
+          title: const Text('Recipe Explorer'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FavoritesPage()),
+                );
+              },
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Favorites'),
+                  SizedBox(width: 8),
+                  Icon(Icons.favorite),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+        body: Column(
+          children: [
+            CustomSearchBar(
+              controller: _searchController,
+              onSearch: _searchMeals,
+            ),
+            CategoryList(
+              categories: _categories,
+              onCategorySelected: _onCategorySelected,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Some chicken recipes',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Expanded(
+              child: FutureBuilder<MealResponse>(
+                future: _mealService.fetchMeals(category: 'Chicken'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(
+                        child: Text('Error loading default(chicken) recipes'));
+                  }
+                  return MealGrid(
+                    meals: snapshot.data?.meals ?? [],
+                    onMealSelected: (mealName) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              RecipeDetail(mealName: mealName),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ));
   }
 }
