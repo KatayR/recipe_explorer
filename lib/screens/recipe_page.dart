@@ -1,19 +1,21 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/meal_model.dart';
 import '../services/meals_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/favorites_service.dart';
 
 class RecipeDetail extends StatefulWidget {
   final String mealName;
 
-  RecipeDetail({required this.mealName});
+  const RecipeDetail({super.key, required this.mealName});
 
   @override
-  _RecipeDetailState createState() => _RecipeDetailState();
+  RecipeDetailState createState() => RecipeDetailState();
 }
 
-class _RecipeDetailState extends State<RecipeDetail> {
+class RecipeDetailState extends State<RecipeDetail> {
+  final FavoritesService _favoritesService = FavoritesService();
+  final MealService _mealService = MealService();
+
   Meal? meal;
   bool isLoading = true;
   bool isFavorite = false;
@@ -21,20 +23,23 @@ class _RecipeDetailState extends State<RecipeDetail> {
   @override
   void initState() {
     super.initState();
-    _fetchMealDetails();
+    _loadMealDetails();
   }
 
-  Future<void> _fetchMealDetails() async {
-    MealService mealService = MealService();
-    final result = await mealService.searchMealsByName(widget.mealName);
+  Future<void> _loadMealDetails() async {
+    final result = await _mealService.searchMealsByName(widget.mealName);
 
     if (result.isNotEmpty) {
+      final mealData = result.first;
+      final loadedMeal = Meal.fromJson(mealData);
+      final favoriteStatus =
+          await _favoritesService.isFavorite(loadedMeal.idMeal);
+
       setState(() {
-        meal = Meal.fromJson(result.first);
+        meal = loadedMeal;
+        isFavorite = favoriteStatus;
         isLoading = false;
       });
-      // Checking if the meal is already in favorites after fetching meal details
-      _checkIfFavorite();
     } else {
       setState(() {
         isLoading = false;
@@ -42,33 +47,14 @@ class _RecipeDetailState extends State<RecipeDetail> {
     }
   }
 
-  Future<void> _checkIfFavorite() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> favorites = prefs.getStringList('favorites') ?? [];
-    if (meal != null) {
-      setState(() {
-        isFavorite = favorites.contains(meal!.idMeal);
-      });
-    }
-  }
-
   Future<void> _toggleFavorite() async {
     if (meal == null) return;
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> favorites = prefs.getStringList('favorites') ?? [];
+    await _favoritesService.toggleFavorite(meal!.toJson());
 
     setState(() {
-      if (isFavorite) {
-        favorites
-            .removeWhere((item) => jsonDecode(item)['idMeal'] == meal!.idMeal);
-      } else {
-        favorites.add(jsonEncode(meal!.toJson()));
-      }
       isFavorite = !isFavorite;
     });
-
-    await prefs.setStringList('favorites', favorites);
   }
 
   @override
@@ -77,43 +63,118 @@ class _RecipeDetailState extends State<RecipeDetail> {
       appBar: AppBar(
         title: Text(widget.mealName),
         actions: [
-          IconButton(
-            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-            onPressed: _toggleFavorite,
-          )
+          if (meal != null)
+            IconButton(
+              icon: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: isFavorite ? Colors.red : null,
+              ),
+              onPressed: _toggleFavorite,
+            ),
         ],
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : meal == null
-              ? Center(child: Text('No meal found'))
-              : SingleChildScrollView(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Image.network(meal!.strMealThumb,
-                          height: 250,
-                          width: double.infinity,
-                          fit: BoxFit.cover),
-                      const SizedBox(height: 16),
-                      const Text('Ingredients:',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18)),
-                      for (int i = 0; i < meal!.ingredients.length; i++)
-                        Text('${meal!.ingredients[i]} - ${meal!.measures[i]}'),
-                      const SizedBox(height: 16),
-                      const Text('Instructions:',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18)),
-                      Text(meal!.strInstructions),
-                      const SizedBox(height: 16),
-                      Text('Category: ${meal!.strCategory}'),
-                      Text('Cuisine: ${meal!.strArea}'),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (meal == null) {
+      return const Center(child: Text('No meal found'));
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 16),
+          _buildIngredients(),
+          const SizedBox(height: 16),
+          _buildInstructions(),
+          const SizedBox(height: 16),
+          _buildMetadata(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        meal!.strMealThumb,
+        height: 250,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  Widget _buildIngredients() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Ingredients:',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...List.generate(
+          meal!.ingredients.length,
+          (index) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Text(
+              '• ${meal!.ingredients[index]} - ${meal!.measures[index]}',
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInstructions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Instructions:',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          meal!.strInstructions,
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetadata() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Category: ${meal!.strCategory}',
+          style: const TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Cuisine: ${meal!.strArea}',
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
     );
   }
 }
