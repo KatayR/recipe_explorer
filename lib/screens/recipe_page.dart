@@ -6,8 +6,9 @@ import '../widgets/recipe_header.dart';
 
 class RecipeDetail extends StatefulWidget {
   final String mealName;
+  final String? mealId;
 
-  const RecipeDetail({super.key, required this.mealName});
+  const RecipeDetail({super.key, required this.mealName, this.mealId});
 
   @override
   RecipeDetailState createState() => RecipeDetailState();
@@ -16,7 +17,6 @@ class RecipeDetail extends StatefulWidget {
 class RecipeDetailState extends State<RecipeDetail> {
   final FavoritesService _favoritesService = FavoritesService();
   final MealService _mealService = MealService();
-
   Meal? meal;
   bool isLoading = true;
   bool isFavorite = false;
@@ -28,8 +28,24 @@ class RecipeDetailState extends State<RecipeDetail> {
   }
 
   Future<void> _loadMealDetails() async {
-    final result = await _mealService.searchMealsByName(widget.mealName);
+    setState(() => isLoading = true);
 
+    // Checking if the meal is in favorites
+    if (widget.mealId != null) {
+      final favoriteMeal =
+          await _favoritesService.getFavoriteMeal(widget.mealId!);
+      if (favoriteMeal != null) {
+        setState(() {
+          meal = favoriteMeal;
+          isFavorite = true;
+          isLoading = false;
+        });
+        return;
+      }
+    }
+
+    // If not in favorites or no mealId provided, fetching from API
+    final result = await _mealService.searchMealsByName(widget.mealName);
     if (result.isNotEmpty) {
       final mealData = result.first;
       final loadedMeal = Meal.fromJson(mealData);
@@ -42,17 +58,13 @@ class RecipeDetailState extends State<RecipeDetail> {
         isLoading = false;
       });
     } else {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
   Future<void> _toggleFavorite() async {
     if (meal == null) return;
-
     await _favoritesService.toggleFavorite(meal!.toJson());
-
     setState(() {
       isFavorite = !isFavorite;
     });
@@ -106,6 +118,7 @@ class RecipeDetailState extends State<RecipeDetail> {
 
   Widget _buildHeader() {
     return RecipeHeader(
+      mealId: meal!.idMeal,
       imageUrl: meal!.strMealThumb,
       isFavorite: isFavorite,
       onFavoritePressed: _toggleFavorite,

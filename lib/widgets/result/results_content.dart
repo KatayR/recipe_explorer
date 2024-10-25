@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/models/meal_model.dart';
 import '/utils/error_handler.dart';
 import '/widgets/meal_list/meal_grid.dart';
 
@@ -7,7 +8,7 @@ class ResultsContent extends StatelessWidget {
   final bool isLoading;
   final bool hasMore;
   final ScrollController scrollController;
-  final Function(String) onMealSelected;
+  final Function(Meal) onMealSelected;
 
   const ResultsContent({
     required this.meals,

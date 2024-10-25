@@ -110,11 +110,12 @@ class _HomePageState extends State<HomePage> {
                 }
                 return MealGrid(
                   meals: snapshot.data?.meals ?? [],
-                  onMealSelected: (mealName) {
+                  onMealSelected: (meal) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RecipeDetail(mealName: mealName),
+                        builder: (context) => RecipeDetail(
+                            mealName: meal.strMeal, mealId: meal.idMeal),
                       ),
                     );
                   },

@@ -53,14 +53,14 @@ class Meal {
       idMeal: json['idMeal'],
       strMeal: json['strMeal'],
       strDrinkAlternate: json['strDrinkAlternate'],
-      strCategory: json['strCategory'],
-      strArea: json['strArea'],
-      strInstructions: json['strInstructions'],
-      strMealThumb: json['strMealThumb'],
+      strCategory: json['strCategory'] ?? '',
+      strArea: json['strArea'] ?? '',
+      strInstructions: json['strInstructions'] ?? '',
+      strMealThumb: json['strMealThumb'] ?? '',
       strTags: json['strTags'] ?? '',
       strYoutube: json['strYoutube'] ?? '',
-      ingredients: extractIngredients(json),
-      measures: extractMeasures(json),
+      ingredients: extractIngredients(json) ?? [],
+      measures: extractMeasures(json) ?? [],
     );
   }
 
