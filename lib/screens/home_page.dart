@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/category_model.dart';
+import '../screens/favorites_page.dart';
 import '../services/meals_service.dart';
 import '../widgets/categories_list.dart';
 import '../widgets/custom_search_bar.dart';
@@ -47,9 +48,17 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Recipi Explorer'),
-      ),
+      appBar: AppBar(title: Text('Recipe Explorer'), actions: [
+        IconButton(
+          icon: Icon(Icons.favorite),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FavoritesPage()),
+            );
+          },
+        ),
+      ]),
       body: Column(
         children: [
           CustomSearchBar(
