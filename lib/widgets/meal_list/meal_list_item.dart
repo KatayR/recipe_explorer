@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MealListItem extends StatelessWidget {
-  final dynamic meal;
+  final Map<String, dynamic> meal;
   final VoidCallback onTap;
 
   const MealListItem({
@@ -12,19 +12,52 @@ class MealListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Building MealListItem: ${meal['strMeal']}');
+
+    final mealName = meal['strMeal'];
+    final mealThumb = meal['strMealThumb'];
+
+    if (mealName == null) {
+      print('Warning: MealListItem has null meal name');
+      return const SizedBox.shrink();
+    }
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: ListTile(
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: Image.network(
-            meal['strMealThumb'],
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: mealThumb != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  mealThumb,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    print('Error loading image for $mealName: $error');
+                    return Container(
+                      width: 60,
+                      height: 60,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.error),
+                    );
+                  },
+                ),
+              )
+            : Container(
+                width: 60,
+                height: 60,
+                color: Colors.grey[300],
+                child: const Icon(Icons.no_food),
+              ),
+        title: Text(
+          mealName,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        title: Text(meal['strMeal']),
         onTap: onTap,
       ),
     );
