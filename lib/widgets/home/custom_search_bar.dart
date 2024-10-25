@@ -18,11 +18,11 @@ class CustomSearchBar extends StatefulWidget {
   final bool isVisible;
 
   const CustomSearchBar({
-    Key? key,
+    super.key,
     required this.onSearch,
     required this.onClose,
     required this.isVisible,
-  }) : super(key: key);
+  });
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();

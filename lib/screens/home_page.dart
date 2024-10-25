@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.favorite),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => FavoritesPage()),
+              MaterialPageRoute(builder: (context) => const FavoritesPage()),
             ),
           ),
         ],
