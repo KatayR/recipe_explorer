@@ -20,14 +20,14 @@ class _HomePageState extends State<HomePage> {
   final MealService _mealService = MealService();
   List<Category> _categories = [];
 
-  void _searchMeals() {
-    final query = _searchController.text.trim();
+  void _searchMeals(String query, SearchType type) {
     if (query.isNotEmpty) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ResultsPage(
             searchQuery: query,
+            searchType: type,
           ),
         ),
       );
