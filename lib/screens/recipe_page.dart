@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/meal_model.dart';
 import '../services/meals_service.dart';
 import '../services/favorites_service.dart';
+import '../widgets/recipe_header.dart';
 
 class RecipeDetail extends StatefulWidget {
   final String mealName;
@@ -104,14 +105,10 @@ class RecipeDetailState extends State<RecipeDetail> {
   }
 
   Widget _buildHeader() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        meal!.strMealThumb,
-        height: 250,
-        width: double.infinity,
-        fit: BoxFit.cover,
-      ),
+    return RecipeHeader(
+      imageUrl: meal!.strMealThumb,
+      isFavorite: isFavorite,
+      onFavoritePressed: _toggleFavorite,
     );
   }
 
