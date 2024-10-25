@@ -1,30 +1,42 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import './database_helper.dart';
+import '../models/meal_model.dart';
+import 'image_cache.dart';
 
 class FavoritesService {
-  static const String _key = 'favorites';
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  final ImageCacheService _imageCache = ImageCacheService.instance;
 
-  Future<List<String>> getFavorites() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList(_key) ?? [];
+  Future<List<Meal>> getFavorites() async {
+    final favorites = await _dbHelper.getAllFavorites();
+    return favorites
+        .map((mealJson) => Meal.fromJson(jsonDecode(mealJson)))
+        .toList();
   }
 
   Future<bool> isFavorite(String mealId) async {
-    final favorites = await getFavorites();
-    return favorites.any((item) => jsonDecode(item)['idMeal'] == mealId);
+    return await _dbHelper.isFavorite(mealId);
   }
 
   Future<void> toggleFavorite(Map<String, dynamic> mealJson) async {
-    final prefs = await SharedPreferences.getInstance();
-    final favorites = await getFavorites();
-    final mealString = jsonEncode(mealJson);
+    final mealId = mealJson['idMeal'] as String;
+    final isFav = await isFavorite(mealId);
 
-    if (favorites.contains(mealString)) {
-      favorites.remove(mealString);
+    if (isFav) {
+      await _dbHelper.removeFavorite(mealId);
+      await _imageCache.removeImage(mealId);
     } else {
-      favorites.add(mealString);
+      // Caching the image using meal ID
+      await _imageCache.cacheImage(mealId, mealJson['strMealThumb'] as String);
+      await _dbHelper.addFavorite(mealId, jsonEncode(mealJson));
     }
+  }
 
-    await prefs.setStringList(_key, favorites);
+  Future<Meal?> getFavoriteMeal(String mealId) async {
+    final mealJson = await _dbHelper.getFavoriteMeal(mealId);
+    if (mealJson != null) {
+      return Meal.fromJson(jsonDecode(mealJson));
+    }
+    return null;
   }
 }
