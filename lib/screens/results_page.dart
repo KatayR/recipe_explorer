@@ -122,21 +122,9 @@ class _ResultsPageState extends State<ResultsPage> {
 
   String _getPageTitle() {
     if (widget.searchQuery != null) {
-      final searchOptions = widget.searchOptions;
-      String searchTypeText = '';
-
-      if (searchOptions != null) {
-        if (searchOptions.byName && searchOptions.byIngredient) {
-          searchTypeText = ' (name & ingredient)';
-        } else if (searchOptions.byName) {
-          searchTypeText = ' (by name)';
-        } else if (searchOptions.byIngredient) {
-          searchTypeText = ' (by ingredient)';
-        }
-      }
-
       return 'Search Results: ${widget.searchQuery}';
+    } else {
+      return 'Category: ${widget.categoryName}';
     }
-    return 'Category: ${widget.categoryName}';
   }
 }
