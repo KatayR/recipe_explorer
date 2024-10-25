@@ -4,7 +4,7 @@ import '../../screens/recipe_page.dart';
 class RecipeList extends StatelessWidget {
   final List<dynamic> meals;
 
-  RecipeList({required this.meals});
+  const RecipeList({super.key, required this.meals});
 
   @override
   Widget build(BuildContext context) {

@@ -6,7 +6,7 @@ void main() {
 }
 
 class RecipeExplorer extends StatelessWidget {
-  const RecipeExplorer({Key? key}) : super(key: key);
+  const RecipeExplorer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class RecipeExplorer extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }

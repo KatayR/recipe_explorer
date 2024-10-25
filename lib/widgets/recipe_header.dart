@@ -9,6 +9,7 @@ class RecipeHeader extends StatelessWidget {
   final String mealId;
 
   const RecipeHeader({
+    super.key,
     required this.imageUrl,
     required this.isFavorite,
     required this.onFavoritePressed,

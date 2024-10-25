@@ -11,6 +11,7 @@ class ResultsContent extends StatelessWidget {
   final Function(Meal) onMealSelected;
 
   const ResultsContent({
+    super.key,
     required this.meals,
     required this.isLoading,
     required this.hasMore,
