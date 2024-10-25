@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import '/widgets/meal_list/meal_card.dart';
+import '../../utils/responsive_helper.dart';
 
 class MealGrid extends StatelessWidget {
   final List<dynamic> meals;
   final Function(String) onMealSelected;
   final ScrollController? scrollController;
+  final bool isLoading;
+  final bool hasMore;
 
   const MealGrid({
     super.key,
     required this.meals,
     required this.onMealSelected,
     this.scrollController,
+    this.isLoading = false,
+    this.hasMore = false,
   });
 
   @override
@@ -18,18 +23,23 @@ class MealGrid extends StatelessWidget {
     return GridView.builder(
       controller: scrollController,
       padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: ResponsiveHelper.getGridCrossAxisCount(context),
+        childAspectRatio: ResponsiveHelper.getGridChildAspectRatio(context),
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemCount: meals.length,
+      itemCount: meals.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        final meal = meals[index];
+        if (index == meals.length) {
+          return isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : const SizedBox();
+        }
+
         return MealCard(
-          meal: meal,
-          onTap: () => onMealSelected(meal['strMeal']),
+          meal: meals[index],
+          onTap: () => onMealSelected(meals[index]['strMeal']),
         );
       },
     );
