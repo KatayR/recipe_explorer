@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    'Tavuk ile yapabileceğiniz örnek yemekler',
+                    'Some chicken recipes',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
