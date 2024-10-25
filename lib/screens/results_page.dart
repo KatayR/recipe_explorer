@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import '../screens/recipe_page.dart';
 import '../services/meals_service.dart';
 import '../widgets/meal_list/paginated_meal_list.dart';
+import '../widgets/home/custom_search_bar.dart';
 
 enum QueryType { search, category }
 
 class ResultsPage extends StatefulWidget {
   final String? searchQuery;
   final String? categoryName;
+  final SearchType? searchType;
 
   const ResultsPage({
     super.key,
     this.searchQuery,
     this.categoryName,
+    this.searchType,
   });
 
   @override
@@ -80,13 +83,23 @@ class _ResultsPageState extends State<ResultsPage> {
   Future<void> _loadInitialResults() async {
     try {
       List<dynamic> results = [];
-
       if (queryType == QueryType.search) {
-        final mealsByName =
-            await _mealService.searchMealsByName(widget.searchQuery!);
-        final mealsByIngredient =
-            await _mealService.searchMealsByIngredient(widget.searchQuery!);
-        results = {...mealsByName, ...mealsByIngredient}.toList();
+        switch (widget.searchType ?? SearchType.both) {
+          case SearchType.name:
+            results = await _mealService.searchMealsByName(widget.searchQuery!);
+            break;
+          case SearchType.ingredient:
+            results =
+                await _mealService.searchMealsByIngredient(widget.searchQuery!);
+            break;
+          case SearchType.both:
+            final mealsByName =
+                await _mealService.searchMealsByName(widget.searchQuery!);
+            final mealsByIngredient =
+                await _mealService.searchMealsByIngredient(widget.searchQuery!);
+            results = {...mealsByName, ...mealsByIngredient}.toList();
+            break;
+        }
       } else if (queryType == QueryType.category) {
         results = await _mealService.getMealsByCategory(widget.categoryName!);
       }
@@ -96,7 +109,6 @@ class _ResultsPageState extends State<ResultsPage> {
         _isLoading = false;
       });
 
-      // Initializng page size and load first batch after layout
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _initializePageSize();
         _loadNextBatch();
