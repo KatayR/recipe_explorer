@@ -16,6 +16,7 @@ class _HomePageState extends State<HomePage> {
   MealService _mealService = MealService();
   List<dynamic> _searchResults = [];
   List<Category> _categories = [];
+  Future<List<dynamic>>? _chickenRecipesFuture;
 
   void _searchMeals() async {
     final results =
@@ -32,10 +33,16 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<List<dynamic>> _loadChickenRecipes() async {
+    final chickenRecipes = await _mealService.getMealsByCategory('Chicken');
+    return chickenRecipes;
+  }
+
   @override
   void initState() {
     super.initState();
     _loadCategories();
+    _chickenRecipesFuture = _loadChickenRecipes();
   }
 
   void _onCategorySelected(String category) async {
@@ -71,7 +78,43 @@ class _HomePageState extends State<HomePage> {
           ),
           _searchResults.isNotEmpty
               ? Expanded(child: RecipeList(meals: _searchResults))
-              : Center(child: Text('No results found')),
+              : Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Tavuk ile yapabileceğiniz örnek yemekler',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: FutureBuilder<List<dynamic>>(
+                          future: _chickenRecipesFuture,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                  child: Text(
+                                      'Error loading default (chicken) recipes'));
+                            } else if (snapshot.hasData &&
+                                snapshot.data!.isNotEmpty) {
+                              return RecipeList(meals: snapshot.data!);
+                            } else {
+                              return Center(
+                                  child: Text('No chicken recipes available'));
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
         ],
       ),
     );
