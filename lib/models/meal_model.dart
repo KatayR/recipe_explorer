@@ -25,6 +25,7 @@ class Meal {
     required this.measures,
   });
 
+  // Factory constructor for creating a Meal object from JSON
   factory Meal.fromJson(Map<String, dynamic> json) {
     List<String> extractIngredients(Map<String, dynamic> json) {
       List<String> ingredients = [];
@@ -61,5 +62,26 @@ class Meal {
       ingredients: extractIngredients(json),
       measures: extractMeasures(json),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> data = {
+      'idMeal': idMeal,
+      'strMeal': strMeal,
+      'strDrinkAlternate': strDrinkAlternate,
+      'strCategory': strCategory,
+      'strArea': strArea,
+      'strInstructions': strInstructions,
+      'strMealThumb': strMealThumb,
+      'strTags': strTags,
+      'strYoutube': strYoutube,
+    };
+
+    for (int i = 0; i < ingredients.length; i++) {
+      data['strIngredient${i + 1}'] = ingredients[i];
+      data['strMeasure${i + 1}'] = measures[i];
+    }
+
+    return data;
   }
 }
