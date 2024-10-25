@@ -1,6 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import '/models/meal_model.dart';
-import '/services/meals_service.dart';
+import '../models/meal_model.dart';
+import '../services/meals_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RecipeDetail extends StatefulWidget {
@@ -32,7 +33,7 @@ class _RecipeDetailState extends State<RecipeDetail> {
         meal = Meal.fromJson(result.first);
         isLoading = false;
       });
-
+      // Checking if the meal is already in favorites after fetching meal details
       _checkIfFavorite();
     } else {
       setState(() {
@@ -59,9 +60,10 @@ class _RecipeDetailState extends State<RecipeDetail> {
 
     setState(() {
       if (isFavorite) {
-        favorites.remove(meal!.idMeal);
+        favorites
+            .removeWhere((item) => jsonDecode(item)['idMeal'] == meal!.idMeal);
       } else {
-        favorites.add(meal!.idMeal);
+        favorites.add(jsonEncode(meal!.toJson()));
       }
       isFavorite = !isFavorite;
     });
