@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/recipe_page.dart';
+import '../../screens/recipe_page.dart';
 
 class RecipeList extends StatelessWidget {
   final List<dynamic> meals;
