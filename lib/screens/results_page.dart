@@ -3,7 +3,7 @@ import '../screens/recipe_page.dart';
 import '../services/meals_service.dart';
 import '../services/results_manager.dart';
 import '../widgets/home/custom_search_bar.dart';
-import '../widgets/results_content.dart';
+import '../widgets/result/results_content.dart';
 
 class ResultsPage extends StatefulWidget {
   final String? searchQuery;
