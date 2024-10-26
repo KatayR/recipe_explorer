@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/meal_model.dart';
 import '../screens/recipe_page.dart';
 import '../services/favorites_service.dart';
-import '../widgets/common/cached_meal_image.dart';
+import '../widgets/common/meal_image.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});

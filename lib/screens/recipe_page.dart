@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/meal_model.dart';
 import '../services/meals_service.dart';
 import '../services/favorites_service.dart';
-import '../widgets/recipe_header.dart';
+import '../widgets/recipe/recipe_header.dart';
 
 class RecipeDetail extends StatefulWidget {
   final String mealName;

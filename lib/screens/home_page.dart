@@ -6,7 +6,7 @@ import '../screens/results_page.dart';
 import '../services/meals_service.dart';
 import '../widgets/home/categories.dart';
 import '../widgets/home/custom_search_bar.dart';
-import '../widgets/meal_list/meal_grid.dart';
+import '../widgets/meal/meal_grid.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
