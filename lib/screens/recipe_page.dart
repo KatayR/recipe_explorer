@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
+import '../../services/api_service.dart';
+import '../../services/favorites_service.dart';
+import '../../utils/responsive_helper.dart';
 import '../models/meal_model.dart';
-import '../services/meals_service.dart';
-import '../services/favorites_service.dart';
-import '../widgets/recipe/recipe_header.dart';
+import '../widgets/common/meal_image.dart';
 
-class RecipeDetail extends StatefulWidget {
+class RecipePage extends StatefulWidget {
+  final String mealId;
   final String mealName;
-  final String? mealId;
 
-  const RecipeDetail({super.key, required this.mealName, this.mealId});
+  const RecipePage({
+    super.key,
+    required this.mealId,
+    required this.mealName,
+  });
 
   @override
-  RecipeDetailState createState() => RecipeDetailState();
+  State<RecipePage> createState() => _RecipePageState();
 }
 
-class RecipeDetailState extends State<RecipeDetail> {
+class _RecipePageState extends State<RecipePage> {
+  final ApiService _apiService = ApiService();
   final FavoritesService _favoritesService = FavoritesService();
-  final MealService _mealService = MealService();
-  Meal? meal;
-  bool isLoading = true;
-  bool isFavorite = false;
+
+  Meal? _meal;
+  bool _isLoading = true;
+  bool _isFavorite = false;
+  String? _error;
 
   @override
   void initState() {
@@ -28,46 +35,39 @@ class RecipeDetailState extends State<RecipeDetail> {
   }
 
   Future<void> _loadMealDetails() async {
-    setState(() => isLoading = true);
+    setState(() => _isLoading = true);
 
-    // Checking if the meal is in favorites
-    if (widget.mealId != null) {
-      final favoriteMeal =
-          await _favoritesService.getFavoriteMeal(widget.mealId!);
-      if (favoriteMeal != null) {
-        setState(() {
-          meal = favoriteMeal;
-          isFavorite = true;
-          isLoading = false;
-        });
-        return;
-      }
-    }
-
-    // If not in favorites or no mealId provided, fetching from API
-    final result = await _mealService.searchMealsByName(widget.mealName);
-    if (result.isNotEmpty) {
-      final mealData = result.first;
-      final loadedMeal = Meal.fromJson(mealData);
-      final favoriteStatus =
-          await _favoritesService.isFavorite(loadedMeal.idMeal);
-
+    // First check if meal is in favorites
+    final savedMeal = await _favoritesService.loadMealIfSaved(widget.mealId);
+    if (savedMeal != null) {
       setState(() {
-        meal = loadedMeal;
-        isFavorite = favoriteStatus;
-        isLoading = false;
+        _meal = savedMeal;
+        _isFavorite = true;
+        _isLoading = false;
       });
-    } else {
-      setState(() => isLoading = false);
+      return;
     }
+
+    // If not in favorites, fetch from API
+    final response = await _apiService.searchMealsByName(widget.mealName);
+
+    setState(() {
+      _isLoading = false;
+      if (response.error != null) {
+        _error = response.error;
+      } else if (response.data != null && response.data!.isNotEmpty) {
+        _meal = Meal.fromJson(response.data!.first);
+      } else {
+        _error = 'Meal not found';
+      }
+    });
   }
 
   Future<void> _toggleFavorite() async {
-    if (meal == null) return;
-    await _favoritesService.toggleFavorite(meal!.toJson());
-    setState(() {
-      isFavorite = !isFavorite;
-    });
+    if (_meal == null) return;
+
+    final newStatus = await _favoritesService.toggleFavorite(_meal!);
+    setState(() => _isFavorite = newStatus);
   }
 
   @override
@@ -76,11 +76,11 @@ class RecipeDetailState extends State<RecipeDetail> {
       appBar: AppBar(
         title: Text(widget.mealName),
         actions: [
-          if (meal != null)
+          if (_meal != null)
             IconButton(
               icon: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : null,
+                _isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: _isFavorite ? Colors.red : null,
               ),
               onPressed: _toggleFavorite,
             ),
@@ -91,12 +91,28 @@ class RecipeDetailState extends State<RecipeDetail> {
   }
 
   Widget _buildBody() {
-    if (isLoading) {
+    if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (meal == null) {
-      return const Center(child: Text('No meal found'));
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_error!),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadMealDetails,
+              child: const Text('Try Again'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_meal == null) {
+      return const Center(child: Text('No meal details available'));
     }
 
     return SingleChildScrollView(
@@ -104,24 +120,31 @@ class RecipeDetailState extends State<RecipeDetail> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          // Recipe Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: MealImage(
+              mealId: _meal!.idMeal,
+              imageUrl: _meal!.strMealThumb,
+              height: ResponsiveHelper.isMobile(context) ? 200 : 400,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
           const SizedBox(height: 16),
+
+          // Ingredients Section
           _buildIngredients(),
           const SizedBox(height: 16),
+
+          // Instructions Section
           _buildInstructions(),
           const SizedBox(height: 16),
+
+          // Additional Info
           _buildMetadata(),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return RecipeHeader(
-      mealId: meal!.idMeal,
-      imageUrl: meal!.strMealThumb,
-      isFavorite: isFavorite,
-      onFavoritePressed: _toggleFavorite,
     );
   }
 
@@ -138,11 +161,11 @@ class RecipeDetailState extends State<RecipeDetail> {
         ),
         const SizedBox(height: 8),
         ...List.generate(
-          meal!.ingredients.length,
+          _meal!.ingredients.length,
           (index) => Padding(
             padding: const EdgeInsets.symmetric(vertical: 2),
             child: Text(
-              '• ${meal!.ingredients[index]} - ${meal!.measures[index]}',
+              '• ${_meal!.ingredients[index]} - ${_meal!.measures[index]}',
               style: const TextStyle(fontSize: 16),
             ),
           ),
@@ -164,7 +187,7 @@ class RecipeDetailState extends State<RecipeDetail> {
         ),
         const SizedBox(height: 8),
         Text(
-          meal!.strInstructions,
+          _meal!.strInstructions,
           style: const TextStyle(fontSize: 16),
         ),
       ],
@@ -176,12 +199,12 @@ class RecipeDetailState extends State<RecipeDetail> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Category: ${meal!.strCategory}',
+          'Category: ${_meal!.strCategory}',
           style: const TextStyle(fontSize: 16),
         ),
         const SizedBox(height: 4),
         Text(
-          'Cuisine: ${meal!.strArea}',
+          'Cuisine: ${_meal!.strArea}',
           style: const TextStyle(fontSize: 16),
         ),
       ],
