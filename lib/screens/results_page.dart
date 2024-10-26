@@ -1,65 +1,51 @@
 import 'package:flutter/material.dart';
-import '../screens/recipe_page.dart';
-import '../services/meals_service.dart';
-import '../services/results_manager.dart';
-import '../widgets/home/custom_search_bar.dart';
-import '../widgets/result/results_content.dart';
+import '../../services/api_service.dart';
+import '../../utils/error_handler.dart';
+import '../widgets/meal/meal_grid.dart';
+import 'recipe_page.dart';
 
 class ResultsPage extends StatefulWidget {
   final String? searchQuery;
   final String? categoryName;
-  final SearchOptions? searchOptions;
+  final bool searchByName;
+  final bool searchByIngredient;
 
   const ResultsPage({
     super.key,
     this.searchQuery,
     this.categoryName,
-    this.searchOptions,
+    this.searchByName = true,
+    this.searchByIngredient = false,
   });
 
   @override
-  _ResultsPageState createState() => _ResultsPageState();
+  State<ResultsPage> createState() => _ResultsPageState();
 }
 
 class _ResultsPageState extends State<ResultsPage> {
-  final MealService _mealService = MealService();
+  final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
-  final List<dynamic> _displayedResults = [];
+
   List<dynamic> _allMeals = [];
+  List<dynamic> _displayedMeals = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
   bool _hasMore = true;
-  late final ResultsManager _resultsManager;
-  final int _batchSize = 10;
+  String? _error;
+
+  static const int _batchSize = 10;
 
   @override
   void initState() {
     super.initState();
-    _resultsManager = ResultsManager(
-      mealService: _mealService,
-      onResultsLoaded: _handleResultsLoaded,
-      onError: _handleError,
-    );
     _scrollController.addListener(_onScroll);
     _loadInitialResults();
   }
 
-  void _handleResultsLoaded(List<dynamic> results) {
-    setState(() {
-      _allMeals = results;
-      _displayedResults.addAll(results.take(_batchSize));
-      _hasMore = _displayedResults.length < _allMeals.length;
-      _isLoading = false;
-    });
-    print(
-        'Initial load: Total items: ${_allMeals.length}, \nCurrently shown: ${_displayedResults.length}, Remaining: ${_allMeals.length - _displayedResults.length}');
-  }
-
-  void _handleError(String error) {
-    setState(() {
-      _isLoading = false;
-      _hasMore = false;
-    });
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _onScroll() {
@@ -72,29 +58,70 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   Future<void> _loadInitialResults() async {
-    await _resultsManager.loadResults(
-      searchQuery: widget.searchQuery,
-      categoryName: widget.categoryName,
-      searchOptions: widget.searchOptions,
-    );
+    setState(() => _isLoading = true);
+
+    try {
+      ApiResponse<List<dynamic>> response;
+
+      if (widget.searchQuery != null) {
+        // Handle search
+        response = await _apiService.searchMeals(
+          query: widget.searchQuery!,
+          searchByName: widget.searchByName,
+          searchByIngredient: widget.searchByIngredient,
+        );
+      } else if (widget.categoryName != null) {
+        // Handle category selection
+        response = await _apiService.getMealsByCategory(widget.categoryName!);
+      } else {
+        throw Exception('Either searchQuery or categoryName must be provided');
+      }
+
+      if (response.error != null) {
+        setState(() {
+          _error = response.error;
+          _isLoading = false;
+        });
+        return;
+      }
+
+      _allMeals = response.data ?? [];
+      _loadNextBatch();
+
+      setState(() {
+        _isLoading = false;
+        _hasMore = _displayedMeals.length < _allMeals.length;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
   }
 
-  Future<void> _loadNextBatch() async {
+  void _loadNextBatch() {
     if (!_hasMore || _isLoadingMore) return;
+
     setState(() => _isLoadingMore = true);
 
-    final nextBatch = _resultsManager.getNextBatch(
-      currentLength: _displayedResults.length,
-      batchSize: _batchSize,
-    );
+    final currentLength = _displayedMeals.length;
+    final nextBatch = _allMeals.skip(currentLength).take(_batchSize).toList();
 
     setState(() {
-      _displayedResults.addAll(nextBatch);
-      _hasMore = _displayedResults.length < _allMeals.length;
+      _displayedMeals.addAll(nextBatch);
+      _hasMore = _displayedMeals.length < _allMeals.length;
       _isLoadingMore = false;
     });
-    print(
-        'Loaded next batch: Newly added: ${nextBatch.length}, \nCurrently shown: ${_displayedResults.length}, \nRemaining: ${_allMeals.length - _displayedResults.length}');
+  }
+
+  String _getPageTitle() {
+    if (widget.searchQuery != null) {
+      return 'Search Results: ${widget.searchQuery}';
+    } else if (widget.categoryName != null) {
+      return 'Category: ${widget.categoryName}';
+    }
+    return 'Results';
   }
 
   @override
@@ -103,29 +130,53 @@ class _ResultsPageState extends State<ResultsPage> {
       appBar: AppBar(
         title: Text(_getPageTitle()),
       ),
-      body: ResultsContent(
-        meals: _displayedResults,
-        isLoading: _isLoading,
-        hasMore: _hasMore,
-        scrollController: _scrollController,
-        onMealSelected: (meal) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  RecipeDetail(mealName: meal.strMeal, mealId: meal.idMeal),
-            ),
-          );
-        },
-      ),
+      body: _buildBody(),
     );
   }
 
-  String _getPageTitle() {
-    if (widget.searchQuery != null) {
-      return 'Search Results: ${widget.searchQuery}';
-    } else {
-      return 'Category: ${widget.categoryName}';
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
     }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ErrorHandler.buildErrorWidget(_error!),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadInitialResults,
+              child: const Text('Try Again'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_displayedMeals.isEmpty) {
+      return const Center(
+        child: Text('No results found'),
+      );
+    }
+
+    return MealGrid(
+      meals: _displayedMeals,
+      onMealSelected: (meal) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecipePage(
+              mealId: meal.idMeal,
+              mealName: meal.strMeal,
+            ),
+          ),
+        );
+      },
+      scrollController: _scrollController,
+      isLoading: _isLoadingMore,
+      hasMore: _hasMore,
+    );
   }
 }

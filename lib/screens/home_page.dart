@@ -1,65 +1,67 @@
 import 'package:flutter/material.dart';
+import '../../services/api_service.dart';
 import '../models/category_model.dart';
-import '../screens/favorites_page.dart';
-import '../screens/recipe_page.dart';
-import '../screens/results_page.dart';
-import '../services/meals_service.dart';
 import '../widgets/home/categories.dart';
 import '../widgets/home/custom_search_bar.dart';
 import '../widgets/meal/meal_grid.dart';
+import 'favorites_page.dart';
+import 'recipe_page.dart';
+import 'results_page.dart';
+import '../../utils/error_handler.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final MealService _mealService = MealService();
+  final ApiService _apiService = ApiService();
   List<Category> _categories = [];
   bool _showSearch = false;
+  bool _isLoadingCategories = true;
 
-  void _searchMeals(String query, SearchOptions searchOptions) {
-    if (query.trim().isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResultsPage(
-            searchQuery: query,
-            searchOptions: searchOptions,
-          ),
-        ),
-      );
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
   }
 
   Future<void> _loadCategories() async {
-    try {
-      final categories = await _mealService.getCategories();
-      setState(() {
+    final response = await _apiService.getCategories();
+    setState(() {
+      _isLoadingCategories = false;
+      if (response.data != null) {
         _categories =
-            categories.map((json) => Category.fromJson(json)).toList();
-      });
-    } catch (e) {
-      print('Error loading categories: $e');
-    }
+            response.data!.map((json) => Category.fromJson(json)).toList();
+      }
+    });
   }
 
   void _onCategorySelected(String category) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ResultsPage(
-          categoryName: category,
-        ),
+        builder: (context) => ResultsPage(categoryName: category),
       ),
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadCategories();
+  void _searchMeals(String query,
+      {bool byName = true, bool byIngredient = false}) {
+    if (query.trim().isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultsPage(
+            searchQuery: query,
+            searchByName: byName,
+            searchByIngredient: byIngredient,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -83,42 +85,57 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          CustomSearchBar(
-            isVisible: _showSearch,
-            onSearch: _searchMeals,
-            onClose: () => setState(() => _showSearch = false),
-          ),
-          CategoryList(
-            categories: _categories,
-            onCategorySelected: _onCategorySelected,
-          ),
+          // Search Bar
+          if (_showSearch)
+            CustomSearchBar(
+              onSearch: _searchMeals,
+              onClose: () => setState(() => _showSearch = false),
+            ),
+
+          // Categories
+          if (_isLoadingCategories)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(),
+            )
+          else
+            CategoryList(
+              categories: _categories,
+              onCategorySelected: _onCategorySelected,
+            ),
+
+          // Default Chicken Recipes Section
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
             child: Text("Sample dishes you can make with chicken"),
           ),
+
+          // Default Recipes Grid
           Expanded(
-            child: FutureBuilder<MealResponse>(
-              future: _mealService.fetchMeals(category: 'Chicken'),
+            child: FutureBuilder<ApiResponse<List<dynamic>>>(
+              future: _apiService.getMealsByCategory('Chicken'),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Error loading default(chicken) recipes'),
-                  );
+
+                if (snapshot.hasError || (snapshot.data?.error != null)) {
+                  return ErrorHandler.buildErrorWidget(
+                      snapshot.data?.error ?? 'Error loading recipes');
                 }
+
+                final meals = snapshot.data?.data ?? [];
                 return MealGrid(
-                  meals: snapshot.data?.meals ?? [],
-                  onMealSelected: (meal) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RecipeDetail(
-                            mealName: meal.strMeal, mealId: meal.idMeal),
+                  meals: meals,
+                  onMealSelected: (meal) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RecipePage(
+                        mealId: meal.idMeal,
+                        mealName: meal.strMeal,
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 );
               },
             ),

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import '../../services/favorites_service.dart';
 import '../models/meal_model.dart';
-import '../screens/recipe_page.dart';
-import '../services/favorites_service.dart';
-import '../widgets/common/meal_image.dart';
+import '../widgets/meal/meal_grid.dart';
+import 'recipe_page.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
 
   @override
-  _FavoritesPageState createState() => _FavoritesPageState();
+  State<FavoritesPage> createState() => _FavoritesPageState();
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
   final FavoritesService _favoritesService = FavoritesService();
-  List<Meal> favoriteMeals = [];
-  bool isLoading = true;
+  List<Meal> _favoriteMeals = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -23,12 +23,26 @@ class _FavoritesPageState extends State<FavoritesPage> {
   }
 
   Future<void> _loadFavorites() async {
-    setState(() => isLoading = true);
+    setState(() => _isLoading = true);
+
     final meals = await _favoritesService.getFavorites();
+
     setState(() {
-      favoriteMeals = meals;
-      isLoading = false;
+      _favoriteMeals = meals;
+      _isLoading = false;
     });
+  }
+
+  void _onMealSelected(Meal meal) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecipePage(
+          mealId: meal.idMeal,
+          mealName: meal.strMeal,
+        ),
+      ),
+    ).then((_) => _loadFavorites()); // Refresh list when returning
   }
 
   @override
@@ -37,37 +51,52 @@ class _FavoritesPageState extends State<FavoritesPage> {
       appBar: AppBar(
         title: const Text('Favorite Recipes'),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : favoriteMeals.isEmpty
-              ? const Center(child: Text('No favorite recipes yet'))
-              : ListView.builder(
-                  itemCount: favoriteMeals.length,
-                  itemBuilder: (context, index) {
-                    final meal = favoriteMeals[index];
-                    return ListTile(
-                      title: Text(meal.strMeal),
-                      leading: MealImage(
-                        mealId: meal.idMeal,
-                        imageUrl: meal.strMealThumb,
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RecipeDetail(
-                              mealName: meal.strMeal,
-                              mealId: meal.idMeal,
-                            ),
-                          ),
-                        ).then((_) => _loadFavorites());
-                      },
-                    );
-                  },
-                ),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_favoriteMeals.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.favorite_border,
+              size: 64,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'No favorite recipes yet',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Add some recipes to your favorites!',
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Convert Meal objects to map format expected by MealGrid
+    final mealsData = _favoriteMeals.map((meal) => meal.toJson()).toList();
+
+    return MealGrid(
+      meals: mealsData,
+      onMealSelected: _onMealSelected,
+      // No need for pagination here as favorites are usually fewer
     );
   }
 }
