@@ -36,9 +36,11 @@ class FavoritesService {
     return await _storage.getFavoriteMeal(mealId);
   }
 
-  /// Load meal data (either from favorites if saved, or return null)
+  // Load meal data (either from favorites if saved, or return null)
+
   /// This is useful when we want to check if we have the meal saved
-  /// before making an API call
+  /// before making an API call. Not that this method will not make any
+  /// meaningful difference for such a small app, but it's a good practice ¯\_(ツ)_/¯
   Future<Meal?> loadMealIfSaved(String mealId) async {
     if (await isFavorite(mealId)) {
       return await getFavoriteMeal(mealId);
