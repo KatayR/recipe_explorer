@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_explorer/models/meal_model.dart';
-import '/widgets/meal_list/meal_card.dart';
+import 'meal_card.dart';
 import '../../utils/responsive_helper.dart';
 
 class MealGrid extends StatelessWidget {
