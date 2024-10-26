@@ -74,8 +74,8 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(_showSearch ? Icons.close : Icons.search),
             onPressed: () => setState(() => _showSearch = !_showSearch),
           ),
-          IconButton(
-            icon: const Icon(Icons.favorite),
+          TextButton(
+            child: const Text('💕', style: TextStyle(fontSize: 22)),
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const FavoritesPage()),
