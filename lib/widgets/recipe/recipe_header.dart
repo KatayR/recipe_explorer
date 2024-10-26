@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../utils/responsive_helper.dart';
-import 'common/cached_meal_image.dart';
+import '../../utils/responsive_helper.dart';
+import '../common/meal_image.dart';
 
 class RecipeHeader extends StatelessWidget {
   final String imageUrl;

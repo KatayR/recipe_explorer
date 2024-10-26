@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/widgets/meal_list/meal_list_item.dart';
+import 'meal_list_item.dart';
 
 class PaginatedMealList extends StatelessWidget {
   final List<dynamic> meals;
