@@ -59,7 +59,7 @@ class Meal {
       strMealThumb: json['strMealThumb'] ?? '',
       strTags: json['strTags'] ?? '',
       strYoutube: json['strYoutube'] ?? '',
-      ingredients: extractIngredients(json) ?? [],
+      ingredients: extractIngredients(json),
       measures: extractMeasures(json),
     );
   }
