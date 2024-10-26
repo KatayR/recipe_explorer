@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_explorer/models/meal_model.dart';
 import '/utils/error_handler.dart';
-import '/widgets/meal_list/meal_grid.dart';
+import '../meal/meal_grid.dart';
 
 class ResultsContent extends StatelessWidget {
   final List<dynamic> meals;
