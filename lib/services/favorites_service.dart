@@ -1,41 +1,47 @@
-import 'dart:convert';
-import './database_helper.dart';
 import '../models/meal_model.dart';
-import 'image_cache.dart';
+import 'storage_service.dart';
 
 class FavoritesService {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-  final ImageCacheService _imageCache = ImageCacheService.instance;
+  final StorageService _storage = StorageService.instance;
 
+  /// Get all favorite meals from storage
   Future<List<Meal>> getFavorites() async {
-    final favorites = await _dbHelper.getAllFavorites();
-    return favorites
-        .map((mealJson) => Meal.fromJson(jsonDecode(mealJson)))
-        .toList();
+    return await _storage.getAllFavorites();
   }
 
+  /// Check if a meal is marked as favorite
   Future<bool> isFavorite(String mealId) async {
-    return await _dbHelper.isFavorite(mealId);
+    return await _storage.isFavorite(mealId);
   }
 
-  Future<void> toggleFavorite(Map<String, dynamic> mealJson) async {
-    final mealId = mealJson['idMeal'] as String;
-    final isFav = await isFavorite(mealId);
+  /// Toggle favorite status of a meal
+  /// Returns the new favorite status (true if added, false if removed)
+  Future<bool> toggleFavorite(Meal meal) async {
+    final isFav = await isFavorite(meal.idMeal);
 
     if (isFav) {
-      await _dbHelper.removeFavorite(mealId);
-      await _imageCache.removeImage(mealId);
+      // Remove from favorites
+      await _storage.removeFromFavorites(meal.idMeal);
+      return false;
     } else {
-      // Caching the image using meal ID
-      await _imageCache.cacheImage(mealId, mealJson['strMealThumb'] as String);
-      await _dbHelper.addFavorite(mealId, jsonEncode(mealJson));
+      // Add to favorites
+      await _storage.addToFavorites(meal);
+      return true;
     }
   }
 
+  /// Get a specific favorite meal by ID
+  /// Returns null if meal is not in favorites
   Future<Meal?> getFavoriteMeal(String mealId) async {
-    final mealJson = await _dbHelper.getFavoriteMeal(mealId);
-    if (mealJson != null) {
-      return Meal.fromJson(jsonDecode(mealJson));
+    return await _storage.getFavoriteMeal(mealId);
+  }
+
+  /// Load meal data (either from favorites if saved, or return null)
+  /// This is useful when we want to check if we have the meal saved
+  /// before making an API call
+  Future<Meal?> loadMealIfSaved(String mealId) async {
+    if (await isFavorite(mealId)) {
+      return await getFavoriteMeal(mealId);
     }
     return null;
   }
