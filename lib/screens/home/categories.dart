@@ -127,18 +127,18 @@ class _ScrollArrow extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 32,
+          width: 16,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: direction == -1
+              begin: direction != -1
                   ? Alignment.centerRight
                   : Alignment.centerLeft,
-              end: direction == -1
+              end: direction != -1
                   ? Alignment.centerLeft
                   : Alignment.centerRight,
               colors: [
-                Colors.black54,
-                Colors.black12,
+                Colors.black38,
+                Colors.grey[100]!,
               ],
             ),
           ),
@@ -173,7 +173,7 @@ class CategoryItem extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: isDesktop ? 150 : 100,
+          width: isDesktop ? 150 : 90,
           margin: const EdgeInsets.symmetric(horizontal: 8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
