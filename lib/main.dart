@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'screens/home/home_page.dart';
 import 'services/storage_service.dart';
@@ -16,6 +18,13 @@ class RecipeExplorer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+          PointerDeviceKind.trackpad,
+        },
+      ),
       title: 'Recipe Explorer',
       theme: ThemeData(
         primarySwatch: Colors.blue,
