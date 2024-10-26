@@ -19,7 +19,8 @@ class RecipeList extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => RecipeDetail(mealName: meal["strMeal"]),
+                builder: (context) => RecipePage(
+                    mealId: meal["idMeal"], mealName: meal["strMeal"]),
               ),
             );
           },
