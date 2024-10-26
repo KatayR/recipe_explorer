@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as pathHelper;
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import '../models/meal_model.dart';
@@ -9,24 +10,51 @@ import '../models/meal_model.dart';
 class StorageService {
   static final StorageService instance = StorageService._init();
   static Database? _database;
+  static bool _initialized = false;
 
   StorageService._init();
+
+  /// Initialize FFI
+  static Future<void> initializeFfi() async {
+    if (!_initialized) {
+      // Initialize FFI
+      if (Platform.isWindows || Platform.isLinux) {
+        sqfliteFfiInit();
+      }
+      // Set the database factory to use FFI
+      databaseFactory = databaseFactoryFfi;
+      _initialized = true;
+    }
+  }
 
   /// Initialize database connection
   Future<Database> get database async {
     if (_database != null) return _database!;
+
+    // Ensure FFI is initialized
+    await initializeFfi();
+
     _database = await _initDB('recipes.db');
     return _database!;
   }
 
   /// Initialize the database, creating tables if needed
   Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
-    final path = pathHelper.join(dbPath, filePath);
-    return await openDatabase(
+    // For better cross-platform support, use getApplicationDocumentsDirectory
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String path =
+        pathHelper.join(documentsDirectory.path, 'databases', filePath);
+
+    // Ensure the directory exists
+    await Directory(pathHelper.dirname(path)).create(recursive: true);
+
+    return await databaseFactory.openDatabase(
       path,
-      version: 1,
-      onCreate: _createDB,
+      options: OpenDatabaseOptions(
+        version: 1,
+        onCreate: _createDB,
+      ),
     );
   }
 
@@ -40,18 +68,13 @@ class StorageService {
     ''');
   }
 
+  // The rest of your methods remain exactly the same since they use standard SQLite operations
   // FAVORITES METHODS
 
-  /// Add a meal to favorites
-  /// Returns true if successful
   Future<bool> addToFavorites(Meal meal) async {
     try {
       final db = await database;
-
-      // First cache the image
       await cacheImage(meal.idMeal, meal.strMealThumb);
-
-      // Then save meal data
       await db.insert(
         'favorites',
         {
