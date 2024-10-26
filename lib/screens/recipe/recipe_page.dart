@@ -35,32 +35,44 @@ class _RecipePageState extends State<RecipePage> {
   }
 
   Future<void> _loadMealDetails() async {
-    setState(() => _isLoading = true);
-
-    // First check if meal is in favorites
-    final savedMeal = await _favoritesService.loadMealIfSaved(widget.mealId);
-    if (savedMeal != null) {
-      setState(() {
-        _meal = savedMeal;
-        _isFavorite = true;
-        _isLoading = false;
-      });
-      return;
-    }
-
-    // If not in favorites, fetch from API
-    final response = await _apiService.searchMealsByName(widget.mealName);
-
     setState(() {
-      _isLoading = false;
-      if (response.error != null) {
-        _error = response.error;
-      } else if (response.data != null && response.data!.isNotEmpty) {
-        _meal = Meal.fromJson(response.data!.first);
-      } else {
-        _error = 'Meal not found';
-      }
+      _isLoading = true;
+      _error = null;
     });
+    try {
+      // First check if meal is in favorites
+      final savedMeal = await _favoritesService.loadMealIfSaved(widget.mealId);
+      if (savedMeal != null) {
+        setState(() {
+          _meal = savedMeal;
+          _isFavorite = true;
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // If not in favorites, fetch from API
+      final response = await _apiService.searchMealsByName(widget.mealName);
+
+      setState(() {
+        _isLoading = false;
+        if (response.error != null) {
+          _error =
+              'Unable to load recipe. Please check your internet connection.';
+        } else if (response.data != null && response.data!.isNotEmpty) {
+          _meal = Meal.fromJson(response.data!.first);
+        } else {
+          _error =
+              'Meal not found'; // User probably wont ever see this but just in case
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _error =
+            'An error occurred. Please try again later.'; // Idk if there's any way to reach this error but just in case
+      });
+    }
   }
 
   Future<void> _toggleFavorite() async {
@@ -100,7 +112,7 @@ class _RecipePageState extends State<RecipePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_error!),
+            Text(_error!, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadMealDetails,
