@@ -1,29 +1,56 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'image_cache.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
+  static bool _initialized = false;
 
   DatabaseHelper._init();
 
+  /// Initialize FFI
+  static Future<void> initializeFfi() async {
+    if (!_initialized) {
+      // Initialize FFI
+      if (Platform.isWindows || Platform.isLinux) {
+        sqfliteFfiInit();
+      }
+      // Set the database factory to use FFI
+      databaseFactory = databaseFactoryFfi;
+      _initialized = true;
+    }
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database!;
+
+    // Ensure FFI is initialized
+    await initializeFfi();
+
     _database = await _initDB('recipes.db');
     return _database!;
   }
 
   Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
+    // For better cross-platform support, use getApplicationDocumentsDirectory
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String path = join(documentsDirectory.path, 'databases', filePath);
 
-    return await openDatabase(
+    // Ensure the directory exists
+    await Directory(dirname(path)).create(recursive: true);
+
+    return await databaseFactory.openDatabase(
       path,
-      version: 1,
-      onCreate: _createDB,
+      options: OpenDatabaseOptions(
+        version: 1,
+        onCreate: _createDB,
+      ),
     );
   }
 
@@ -43,7 +70,6 @@ class DatabaseHelper {
         .map((row) =>
             jsonDecode(row['mealData'] as String)['strMealThumb'] as String)
         .toSet();
-
     final cacheDir = await ImageCacheService.instance.getCacheDirectory();
     if (await cacheDir.exists()) {
       final files = await cacheDir.list().toList();
