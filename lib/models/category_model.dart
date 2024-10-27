@@ -1,7 +1,7 @@
 class Category {
-  final String idCategory;
-  final String strCategory;
-  final String strCategoryThumb;
+  final String idCategory; // Unique identifier for the category
+  final String strCategory; // Category name
+  final String strCategoryThumb; // URL for category thumbnail image
   final String strCategoryDescription;
 
   Category({

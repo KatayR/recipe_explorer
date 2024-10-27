@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-// Response wrapper to handle both data and errors
+/// Service class for handling all API communications
 class ApiResponse<T> {
   final T? data;
   final String? error;
