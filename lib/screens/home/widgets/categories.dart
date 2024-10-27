@@ -191,6 +191,9 @@ class _CategoryListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
+    /// Determines the height based on the device type.
+    /// If the device is mobile, the height is set to 100.0.
+    /// Otherwise, the height is set to 120.0.
     final height = ResponsiveHelper.isMobile(context) ? 100.0 : 120.0;
 
     return MouseRegion(
