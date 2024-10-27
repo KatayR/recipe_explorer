@@ -77,7 +77,8 @@ class _ResultsPageState extends State<ResultsPage> {
         // Handle category selection
         response = await _apiService.getMealsByCategory(widget.categoryName!);
       } else {
-        throw Exception('Either searchQuery or categoryName must be provided');
+        throw Exception(
+            'Either searchQuery or categoryName must be provided'); // This should never happen, but just in case
       }
 
       if (response.error != null) {
@@ -104,6 +105,7 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   void _loadNextBatch() {
+    print('Loading next batch...');
     if (!_hasMore || _isLoadingMore) return;
 
     setState(() => _isLoadingMore = true);
