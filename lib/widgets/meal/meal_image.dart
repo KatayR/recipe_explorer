@@ -33,6 +33,7 @@ class _MealImageState extends State<MealImage> {
     _loadImage();
   }
 
+  /// Loads the image either from cache or by downloading it.
   Future<void> _loadImage() async {
     try {
       // Checking if image is already cached
@@ -98,6 +99,7 @@ class _MealImageState extends State<MealImage> {
     );
   }
 
+  /// Builds a widget to display when an error occurs while loading the image.
   Widget _buildErrorWidget() {
     return Container(
       width: widget.width,

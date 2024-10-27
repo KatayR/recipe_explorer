@@ -12,12 +12,8 @@ class MealListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mealName = meal['strMeal'];
-    final mealThumb = meal['strMealThumb'];
-
-    if (mealName == null) {
-      return const SizedBox.shrink();
-    }
+    final mealName = meal['strMeal']; // Meal name
+    final mealThumb = meal['strMealThumb']; // Meal thumbnail URL
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -32,6 +28,7 @@ class MealListItem extends StatelessWidget {
                   height: 60,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
+                    // Display an error icon if image fails to load
                     return Container(
                       width: 60,
                       height: 60,
@@ -45,7 +42,8 @@ class MealListItem extends StatelessWidget {
                 width: 60,
                 height: 60,
                 color: Colors.grey[300],
-                child: const Icon(Icons.restaurant),
+                child: const Icon(
+                    Icons.restaurant), // Default icon if no thumbnail
               ),
         title: Text(
           mealName,

@@ -1,3 +1,24 @@
+/// A service class for caching images locally on the device.
+///
+/// This class provides methods to cache images, retrieve cached image paths,
+/// clear the cache, and remove specific cached images.
+///
+/// Usage:
+/// ```dart
+/// final imageCacheService = ImageCacheService.instance;
+/// ```
+///
+/// Methods:
+/// - `Future<String> getCachedImagePath(String mealId)`: Returns the file path
+///   of the cached image for the given meal ID.
+/// - `Future<String?> cacheImage(String mealId, String imageUrl)`: Downloads
+///   and caches the image from the given URL, and returns the file path of the
+///   cached image. If the image is already cached, returns the existing file path.
+/// - `Future<Directory> getCacheDirectory()`: Returns the directory used for
+///   caching images.
+/// - `Future<void> clearCache()`: Clears all cached images.
+/// - `Future<void> removeImage(String mealId)`: Removes the cached image for
+///   the given meal ID.
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';

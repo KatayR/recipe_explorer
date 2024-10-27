@@ -38,6 +38,11 @@ class _RecipePageState extends State<RecipePage> {
     _loadMealDetails();
   }
 
+  /// Loads the details of the meal.
+  ///
+  /// This method first checks if the meal is saved as a favorite. If it is,
+  /// it loads the saved details. Otherwise, it fetches the meal details from
+  /// the API. If an error occurs during the fetch, an error message is displayed.
   Future<void> _loadMealDetails() async {
     setState(() {
       _isLoading = true;
@@ -68,6 +73,11 @@ class _RecipePageState extends State<RecipePage> {
     });
   }
 
+  /// Toggles the favorite status of the meal.
+  ///
+  /// This method updates the favorite status of the meal by calling the
+  /// [FavoritesService]. If the meal is marked as a favorite, it is saved;
+  /// otherwise, it is removed from the favorites.
   Future<void> _toggleFavorite() async {
     if (_meal == null) return;
     final newStatus = await _favoritesService.toggleFavorite(_meal!);
@@ -94,6 +104,13 @@ class _RecipePageState extends State<RecipePage> {
     );
   }
 
+  /// Builds the body of the page.
+  ///
+  /// This method returns different widgets based on the current state:
+  /// - A loading indicator if the data is being fetched.
+  /// - An error view if an error occurred during the fetch.
+  /// - A message indicating no meal details are available if the meal is null.
+  /// - The meal details if the meal is successfully fetched.
   Widget _buildBody() {
     if (_isLoading) {
       return const LoadingView();

@@ -1,3 +1,41 @@
+/// A stateful widget that displays search results or meals by category.
+///
+/// The [ResultsPage] widget fetches and displays a list of meals based on the
+/// provided search query or category name. It supports pagination and handles
+/// loading states and errors.
+///
+/// The widget requires either a [searchQuery] or a [categoryName] to be provided.
+///
+/// The [searchByName] and [searchByIngredient] flags determine the type of search
+/// to be performed when a [searchQuery] is provided.
+///
+/// The [ResultsPage] consists of the following main components:
+/// - An app bar displaying the search query or category name.
+/// - A body that displays a loading indicator, error message, or the list of meals.
+///
+/// The meals are fetched using the [ApiService] and displayed in batches for
+/// better performance and user experience.
+///
+/// The widget also supports navigation to a detailed recipe page when a meal is
+/// selected.
+///
+/// Example usage:
+///
+/// ```dart
+/// ResultsPage(
+///   searchQuery: 'Chicken',
+///   searchByName: true,
+///   searchByIngredient: false,
+/// );
+/// ```
+///
+/// or
+///
+/// ```dart
+/// ResultsPage(
+///   categoryName: 'Dessert',
+/// );
+/// ```
 import 'package:flutter/material.dart';
 import '../../../services/api_service.dart';
 import '../../models/meal_model.dart';
@@ -28,18 +66,26 @@ class _ResultsPageState extends State<ResultsPage> {
   final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
 
+  // List to store all fetched meals
   List<dynamic> _allMeals = [];
+
+  // List to store meals currently displayed on the screen
   final List<dynamic> _displayedMeals = [];
+
+  // Flags to handle loading states
   bool _isLoading = true;
   bool _isLoadingMore = false;
   bool _hasMore = true;
+
   String? _error;
 
+  // Number of meals to load per batch
   static const int _batchSize = 10;
 
   @override
   void initState() {
     super.initState();
+    // Add scroll listener to handle pagination
     _scrollController.addListener(_onScroll);
     _loadInitialResults();
   }
@@ -50,6 +96,9 @@ class _ResultsPageState extends State<ResultsPage> {
     super.dispose();
   }
 
+  /// Handles scroll events to implement pagination. This method checks if the
+  /// user has scrolled to 90% of the maximum scroll extent and if more data
+  /// can be loaded.
   void _onScroll() {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent * 0.9 &&
@@ -59,6 +108,7 @@ class _ResultsPageState extends State<ResultsPage> {
     }
   }
 
+  // Method to load the initial set of results based on search query or category
   Future<void> _loadInitialResults() async {
     setState(() {
       _isLoading = true;
@@ -99,6 +149,7 @@ class _ResultsPageState extends State<ResultsPage> {
     });
   }
 
+  // Method to load the next batch of results for pagination
   void _loadNextBatch() {
     if (!_hasMore || _isLoadingMore) return;
 
@@ -114,6 +165,7 @@ class _ResultsPageState extends State<ResultsPage> {
     });
   }
 
+  // Method to navigate to the detailed recipe page
   void _navigateToRecipe(Meal meal) {
     Navigator.push(
       context,
@@ -126,6 +178,7 @@ class _ResultsPageState extends State<ResultsPage> {
     );
   }
 
+  // Method to get the title of the page based on search query or category
   String _getPageTitle() {
     if (widget.searchQuery != null) {
       return 'Search Results: ${widget.searchQuery}';
@@ -145,6 +198,7 @@ class _ResultsPageState extends State<ResultsPage> {
     );
   }
 
+  // Method to build the body of the page based on loading state, errors, and results
   Widget _buildBody() {
     if (_isLoading) {
       return const LoadingView();

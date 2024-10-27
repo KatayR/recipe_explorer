@@ -9,6 +9,7 @@ class MealGrid extends StatelessWidget {
   final Function(Meal) onMealSelected;
   final ScrollController? scrollController;
   final bool isLoading;
+  // Flag to indicate if there are more items to load
   final bool hasMore;
 
   const MealGrid({
@@ -26,19 +27,25 @@ class MealGrid extends StatelessWidget {
       controller: scrollController,
       padding: const EdgeInsets.all(8),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        // Get the number of columns based on screen size
         crossAxisCount: ResponsiveHelper.getGridCrossAxisCount(context),
+        // Get the aspect ratio of the grid items based on screen size
         childAspectRatio: ResponsiveHelper.getGridChildAspectRatio(context),
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
+      // Add an extra item if there are more items to load
       itemCount: meals.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
+        // If the index is at the end of the list, show a loading indicator or an empty box
         if (index == meals.length) {
           return isLoading ? const LoadingView() : const SizedBox();
         }
 
+        // Otherwise, show a meal card
         return MealCard(
           meal: meals[index],
+          // Call the onMealSelected callback when a meal is tapped
           onTap: () => onMealSelected(Meal.fromJson(meals[index])),
         );
       },

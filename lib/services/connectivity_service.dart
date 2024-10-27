@@ -1,3 +1,23 @@
+/// A service that provides connectivity status and internet availability checks.
+///
+/// The `ConnectivityService` class uses the `connectivity_plus` package to monitor
+/// connectivity changes and the `http` package to verify internet access.
+///
+/// This service is implemented as a singleton, accessible via the `instance` field.
+///
+/// Example usage:
+/// ```dart
+/// final connectivityService = ConnectivityService.instance;
+/// final isConnected = await connectivityService.checkConnectivity();
+/// ```
+///
+/// Methods:
+/// - `Stream<bool> get onConnectedChanged`: A stream that emits a boolean value
+///   indicating whether the device is connected to the internet.
+/// - `Future<bool> checkConnectivity()`: Checks the current connectivity status
+///   and verifies internet access.
+/// - `Future<bool> _checkInternet()`: A private method that attempts to make an
+///   HTTP GET request to verify internet access.
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 
