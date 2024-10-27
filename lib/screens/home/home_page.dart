@@ -68,21 +68,34 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const HomeAppBar(),
-      body: Column(
-        children: [
-          CustomSearchBar(onSearch: _searchMeals),
-          if (_isLoadingCategories) // could use future builder here but too much boilerplate
-            const LoadingView()
-          else
-            CategoryList(
-              categories: _categories,
-              onCategorySelected: _onCategorySelected,
+      body: SafeArea(
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            const HomeAppBar(),
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CustomSearchBar(onSearch: _searchMeals),
+                  ),
+                  if (_isLoadingCategories)
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: LoadingView(),
+                    )
+                  else
+                    CategoryList(
+                      categories: _categories,
+                      onCategorySelected: _onCategorySelected,
+                    ),
+                  const Divider(),
+                ],
+              ),
             ),
-          Expanded(
-            child: DefaultRecipesSection(apiService: _apiService),
-          ),
-        ],
+          ],
+          body: DefaultRecipesSection(apiService: _apiService),
+        ),
       ),
     );
   }
