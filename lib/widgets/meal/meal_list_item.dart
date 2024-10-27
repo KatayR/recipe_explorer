@@ -45,7 +45,7 @@ class MealListItem extends StatelessWidget {
                 width: 60,
                 height: 60,
                 color: Colors.grey[300],
-                child: const Icon(Icons.no_food),
+                child: const Icon(Icons.restaurant),
               ),
         title: Text(
           mealName,
