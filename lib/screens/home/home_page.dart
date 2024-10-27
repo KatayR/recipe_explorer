@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../../services/api_service.dart';
 import '../../models/category_model.dart';
-import '../../services/api_service.dart';
-import '../../widgets/meal/meal_grid.dart';
-import '../favorites/favorites_page.dart';
-import '../recipe/recipe_page.dart';
-import '../results/results_page.dart';
-import '../../../utils/error_handler.dart';
+import '../../widgets/loading/loading_view.dart';
+import 'widgets/app_bar.dart';
 import 'widgets/categories.dart';
 import 'widgets/custom_search_bar.dart';
+import 'widgets/default_recipes.dart';
+import '../results/results_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -66,73 +65,22 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recipe Explorer'),
-        actions: [
-          TextButton(
-            child: const Text('💕', style: TextStyle(fontSize: 22)),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const FavoritesPage()),
-            ),
-          ),
-        ],
-      ),
+      appBar: const HomeAppBar(),
       body: Column(
         children: [
-          // Search Bar
-
-          CustomSearchBar(
-            onSearch: _searchMeals,
-          ),
-
-          // Categories
+          CustomSearchBar(onSearch: _searchMeals),
           if (_isLoadingCategories)
             const Padding(
               padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
+              child: const LoadingView(),
             )
           else
             CategoryList(
               categories: _categories,
               onCategorySelected: _onCategorySelected,
             ),
-
-          // Default Chicken Recipes Section
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text("Sample dishes you can make with chicken"),
-          ),
-
-          // Default Recipes Grid
           Expanded(
-            child: FutureBuilder<ApiResponse<List<dynamic>>>(
-              future: _apiService.getMealsByCategory('Chicken'),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError || (snapshot.data?.error != null)) {
-                  return ErrorHandler.buildErrorWidget(
-                      snapshot.data?.error ?? 'Error loading recipes');
-                }
-
-                final meals = snapshot.data?.data ?? [];
-                return MealGrid(
-                  meals: meals,
-                  onMealSelected: (meal) => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RecipePage(
-                        mealId: meal.idMeal,
-                        mealName: meal.strMeal,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+            child: DefaultRecipesSection(apiService: _apiService),
           ),
         ],
       ),
