@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../utils/responsive_helper.dart';
-import '../../widgets/meal/meal_image.dart';
+import '../../../utils/responsive_helper.dart';
+import '../../../widgets/meal/meal_image.dart';
 
 class RecipeHeader extends StatelessWidget {
   final String mealId;
