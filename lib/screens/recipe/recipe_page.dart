@@ -132,21 +132,50 @@ class _RecipePageState extends State<RecipePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Recipe Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: MealImage(
-              mealId: _meal!.idMeal,
-              imageUrl: _meal!.strMealThumb,
-              height: ResponsiveHelper.isMobile(context) ? 200 : 400,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(height: 16),
+          if (ResponsiveHelper.isMobile(context))
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Recipe Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: MealImage(
+                    mealId: _meal!.idMeal,
+                    imageUrl: _meal!.strMealThumb,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-          // Ingredients Section
-          _buildIngredients(),
+                // Ingredients Section
+                _buildIngredients(),
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Recipe Image
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: MealImage(
+                      mealId: _meal!.idMeal,
+                      imageUrl: _meal!.strMealThumb,
+                      height: 400,
+                      width: 400,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+
+                // Ingredients Section
+                Expanded(child: _buildIngredients()),
+              ],
+            ),
           const SizedBox(height: 16),
 
           // Instructions Section
