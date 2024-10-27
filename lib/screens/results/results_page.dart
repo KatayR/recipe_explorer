@@ -29,7 +29,7 @@ class _ResultsPageState extends State<ResultsPage> {
   final ScrollController _scrollController = ScrollController();
 
   List<dynamic> _allMeals = [];
-  List<dynamic> _displayedMeals = [];
+  final List<dynamic> _displayedMeals = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
   bool _hasMore = true;

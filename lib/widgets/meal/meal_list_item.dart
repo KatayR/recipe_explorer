@@ -12,13 +12,10 @@ class MealListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('Building MealListItem: ${meal['strMeal']}');
-
     final mealName = meal['strMeal'];
     final mealThumb = meal['strMealThumb'];
 
     if (mealName == null) {
-      print('Warning: MealListItem has null meal name');
       return const SizedBox.shrink();
     }
 
@@ -35,7 +32,6 @@ class MealListItem extends StatelessWidget {
                   height: 60,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    print('Error loading image for $mealName: $error');
                     return Container(
                       width: 60,
                       height: 60,
