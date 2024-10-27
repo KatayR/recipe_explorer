@@ -19,8 +19,9 @@ class DefaultRecipesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: Text("Sample dishes you can make with chicken"),
+          padding: EdgeInsets.all(8.0),
+          child: Text("Sample dishes you can make with chicken",
+              style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         Expanded(
           child: FutureBuilder<ApiResponse<List<dynamic>>>(

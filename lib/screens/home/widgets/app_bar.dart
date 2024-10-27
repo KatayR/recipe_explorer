@@ -6,14 +6,16 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
+    return SliverAppBar(
+      floating: true,
+      snap: true,
       title: const Text('Recipe Explorer'),
       actions: [
         TextButton(
           child: const Text('💕', style: TextStyle(fontSize: 22)),
           onPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const FavoritesPage()),
+            MaterialPageRoute(builder: (context) => FavoritesPage()),
           ),
         ),
       ],
