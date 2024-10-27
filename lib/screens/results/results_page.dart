@@ -91,7 +91,6 @@ class _ResultsPageState extends State<ResultsPage> {
     }
 
     _allMeals = response.data ?? [];
-    print('All meals length: ${_allMeals.length}');
     _loadNextBatch();
 
     setState(() {
@@ -101,21 +100,16 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   void _loadNextBatch() {
-    print('Loading next batch...');
     if (!_hasMore || _isLoadingMore) return;
 
     setState(() => _isLoadingMore = true);
 
     final currentLength = _displayedMeals.length;
-    print('Current length: $currentLength');
     final nextBatch = _allMeals.skip(currentLength).take(_batchSize).toList();
-    print('Next batch length: ${nextBatch.length}');
 
     setState(() {
       _displayedMeals.addAll(nextBatch);
-      print('New displayed meals length: ${_displayedMeals.length}');
       _hasMore = _displayedMeals.length < _allMeals.length;
-      print('Has more: $_hasMore');
       _isLoadingMore = false;
     });
   }
