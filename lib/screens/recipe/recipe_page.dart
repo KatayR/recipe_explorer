@@ -3,7 +3,7 @@ import '../../../services/api_service.dart';
 import '../../../services/favorites_service.dart';
 import '../../../utils/responsive_helper.dart';
 import '../../models/meal_model.dart';
-import '../../widgets/common/meal_image.dart';
+import '../../widgets/meal/meal_image.dart';
 
 class RecipePage extends StatefulWidget {
   final String mealId;
