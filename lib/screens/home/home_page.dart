@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/widgets/connectivity/connected_wrapper.dart';
 import '../../../services/api_service.dart';
-import '../../models/category_model.dart';
-import '../../widgets/loading/loading_view.dart';
+import '../../widgets/error/error_view.dart';
 import 'widgets/app_bar.dart';
 import 'widgets/categories.dart';
 import 'widgets/custom_search_bar.dart';
@@ -20,24 +20,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ApiService _apiService = ApiService();
-  List<Category> _categories = [];
-  bool _isLoadingCategories = true;
 
   @override
   void initState() {
     super.initState();
-    _loadCategories();
-  }
-
-  Future<void> _loadCategories() async {
-    final response = await _apiService.getCategories();
-    setState(() {
-      _isLoadingCategories = false;
-      if (response.data != null) {
-        _categories =
-            response.data!.map((json) => Category.fromJson(json)).toList();
-      }
-    });
   }
 
   void _onCategorySelected(String category) {
@@ -69,32 +55,40 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            const HomeAppBar(),
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CustomSearchBar(onSearch: _searchMeals),
+        child: ConnectivityWrapper(
+          errorBuilder: (retryCallback) => CustomScrollView(
+            slivers: [
+              const HomeAppBar(),
+              SliverFillRemaining(
+                child: Center(
+                  child: ErrorView(
+                    errString: 'No internet connection',
+                    onRetry: retryCallback,
                   ),
-                  if (_isLoadingCategories)
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: LoadingView(),
-                    )
-                  else
-                    CategoryList(
-                      categories: _categories,
+                ),
+              ),
+            ],
+          ),
+          child: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) => [
+              const HomeAppBar(),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CustomSearchBar(onSearch: _searchMeals),
+                    ),
+                    CategoriesSection(
                       onCategorySelected: _onCategorySelected,
                     ),
-                  const Divider(),
-                ],
+                    const Divider(),
+                  ],
+                ),
               ),
-            ),
-          ],
-          body: DefaultRecipesSection(apiService: _apiService),
+            ],
+            body: DefaultRecipesSection(apiService: _apiService),
+          ),
         ),
       ),
     );
