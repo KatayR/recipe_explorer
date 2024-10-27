@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
               SliverFillRemaining(
                 child: Center(
                   child: ErrorView(
-                    errString: 'No internet connection',
+                    errString: "Couldn't load homepage. Check your connection.",
                     onRetry: retryCallback,
                   ),
                 ),
