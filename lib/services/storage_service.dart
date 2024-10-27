@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart' as pathHelper;
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as path_helper;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:path_provider/path_provider.dart';
@@ -44,10 +45,10 @@ class StorageService {
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
     final String path =
-        pathHelper.join(documentsDirectory.path, 'databases', filePath);
+        path_helper.join(documentsDirectory.path, 'databases', filePath);
 
     // Ensure the directory exists
-    await Directory(pathHelper.dirname(path)).create(recursive: true);
+    await Directory(path_helper.dirname(path)).create(recursive: true);
 
     return await databaseFactory.openDatabase(
       path,
@@ -85,7 +86,9 @@ class StorageService {
       );
       return true;
     } catch (e) {
-      print('Error adding to favorites: $e');
+      if (kDebugMode) {
+        print('Error adding to favorites: $e');
+      }
       return false;
     }
   }
@@ -103,7 +106,9 @@ class StorageService {
       await removeImage(mealId);
       return true;
     } catch (e) {
-      print('Error removing from favorites: $e');
+      if (kDebugMode) {
+        print('Error removing from favorites: $e');
+      }
       return false;
     }
   }
@@ -119,7 +124,9 @@ class StorageService {
       );
       return result.isNotEmpty;
     } catch (e) {
-      print('Error checking favorite status: $e');
+      if (kDebugMode) {
+        print('Error checking favorite status: $e');
+      }
       return false;
     }
   }
@@ -133,7 +140,9 @@ class StorageService {
           .map((row) => Meal.fromJson(jsonDecode(row['mealData'] as String)))
           .toList();
     } catch (e) {
-      print('Error getting favorites: $e');
+      if (kDebugMode) {
+        print('Error getting favorites: $e');
+      }
       return [];
     }
   }
@@ -152,7 +161,9 @@ class StorageService {
       }
       return null;
     } catch (e) {
-      print('Error getting favorite meal: $e');
+      if (kDebugMode) {
+        print('Error getting favorite meal: $e');
+      }
       return null;
     }
   }
@@ -172,7 +183,7 @@ class StorageService {
   /// Get the path for a cached image
   Future<String> getImagePath(String mealId) async {
     final cacheDir = await _getImageCacheDirectory();
-    return pathHelper.join(cacheDir.path, '$mealId.jpg');
+    return path_helper.join(cacheDir.path, '$mealId.jpg');
   }
 
   /// Cache an image
@@ -195,7 +206,9 @@ class StorageService {
       }
       return null;
     } catch (e) {
-      print('Error caching image: $e');
+      if (kDebugMode) {
+        print('Error caching image: $e');
+      }
       return null;
     }
   }
@@ -209,7 +222,9 @@ class StorageService {
         await file.delete();
       }
     } catch (e) {
-      print('Error removing image: $e');
+      if (kDebugMode) {
+        print('Error removing image: $e');
+      }
     }
   }
 
@@ -225,7 +240,7 @@ class StorageService {
         final files = await cacheDir.list().toList();
         for (var file in files) {
           if (file is File) {
-            final fileName = pathHelper.basename(file.path);
+            final fileName = path_helper.basename(file.path);
             final mealId = fileName.split('.').first;
             if (!usedIds.contains(mealId)) {
               await file.delete();
@@ -234,7 +249,9 @@ class StorageService {
         }
       }
     } catch (e) {
-      print('Error cleaning up images: $e');
+      if (kDebugMode) {
+        print('Error cleaning up images: $e');
+      }
     }
   }
 }

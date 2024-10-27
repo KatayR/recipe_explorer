@@ -69,10 +69,10 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           CustomSearchBar(onSearch: _searchMeals),
-          if (_isLoadingCategories)
+          if (_isLoadingCategories) // could use future builder here but too much boilerplate
             const Padding(
               padding: EdgeInsets.all(8.0),
-              child: const LoadingView(),
+              child: LoadingView(),
             )
           else
             CategoryList(
