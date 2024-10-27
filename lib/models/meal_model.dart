@@ -1,26 +1,20 @@
 class Meal {
   final String idMeal;
   final String strMeal;
-  final String? strDrinkAlternate;
   final String strCategory;
   final String strArea;
   final String strInstructions;
   final String strMealThumb;
-  final String strTags;
-  final String strYoutube;
   final List<String> ingredients;
   final List<String> measures;
 
   Meal({
     required this.idMeal,
     required this.strMeal,
-    this.strDrinkAlternate,
     required this.strCategory,
     required this.strArea,
     required this.strInstructions,
     required this.strMealThumb,
-    required this.strTags,
-    required this.strYoutube,
     required this.ingredients,
     required this.measures,
   });
@@ -52,13 +46,10 @@ class Meal {
     return Meal(
       idMeal: json['idMeal'],
       strMeal: json['strMeal'],
-      strDrinkAlternate: json['strDrinkAlternate'],
       strCategory: json['strCategory'] ?? '',
       strArea: json['strArea'] ?? '',
       strInstructions: json['strInstructions'] ?? '',
       strMealThumb: json['strMealThumb'] ?? '',
-      strTags: json['strTags'] ?? '',
-      strYoutube: json['strYoutube'] ?? '',
       ingredients: extractIngredients(json),
       measures: extractMeasures(json),
     );
@@ -68,13 +59,10 @@ class Meal {
     Map<String, dynamic> data = {
       'idMeal': idMeal,
       'strMeal': strMeal,
-      'strDrinkAlternate': strDrinkAlternate,
       'strCategory': strCategory,
       'strArea': strArea,
       'strInstructions': strInstructions,
       'strMealThumb': strMealThumb,
-      'strTags': strTags,
-      'strYoutube': strYoutube,
     };
 
     for (int i = 0; i < ingredients.length; i++) {
