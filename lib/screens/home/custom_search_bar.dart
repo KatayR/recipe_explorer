@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatefulWidget {
   final Function(String, {bool byName, bool byIngredient}) onSearch;
-  final VoidCallback onClose;
 
   const CustomSearchBar({
     super.key,
     required this.onSearch,
-    required this.onClose,
   });
 
   @override
@@ -34,7 +32,6 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         byIngredient: _byIngredient,
       );
       _controller.clear();
-      widget.onClose();
     }
   }
 
