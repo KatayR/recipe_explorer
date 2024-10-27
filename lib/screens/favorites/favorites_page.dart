@@ -1,3 +1,20 @@
+/// A stateful widget that displays the user's favorite recipes.
+///
+/// The `FavoritesPage` widget fetches and displays a list of favorite meals
+/// from the `FavoritesService`. It shows a loading indicator while the data
+/// is being fetched and displays a message if no favorite recipes are found.
+///
+/// When a meal is selected, it navigates to the `RecipePage` to show the
+/// details of the selected meal. Upon returning from the `RecipePage`, the
+/// list of favorite meals is refreshed.
+///
+/// The widget consists of:
+/// - An `AppBar` with the title "Favorite Recipes".
+/// - A body that shows either a loading indicator, a message indicating no
+///   favorite recipes, or a grid of favorite meals.
+///
+/// The favorite meals are displayed using the `MealGrid` widget, which
+/// expects the meals data in a map format.
 import 'package:flutter/material.dart';
 import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../../services/favorites_service.dart';

@@ -3,6 +3,28 @@ import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../services/connectivity_service.dart';
 import '../error/error_view.dart';
 
+/// A widget that wraps its child with connectivity checking functionality.
+///
+/// The `ConnectivityWrapper` listens to connectivity changes and displays
+/// different widgets based on the current connectivity status. It shows a
+/// loading view while the initial connectivity check is being performed,
+/// an error view when there is no internet connection, and the provided
+/// child widget when the device is connected to the internet.
+///
+/// The `errorBuilder` parameter can be used to provide a custom error widget
+/// that will be displayed when there is no internet connection.
+///
+/// Example usage:
+///
+/// ```dart
+/// ConnectivityWrapper(
+///   child: MyConnectedWidget(),
+///   errorBuilder: (retryCallback) => MyCustomErrorWidget(onRetry: retryCallback),
+/// )
+/// ```
+///
+/// The `ConnectivityWrapper` relies on a `ConnectivityService` to check and
+/// listen for connectivity changes.
 class ConnectivityWrapper extends StatefulWidget {
   final Widget child;
   final Widget Function(VoidCallback retryCallback)? errorBuilder;
@@ -29,6 +51,7 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
     _setupConnectivityListener();
   }
 
+  /// Initializes the connectivity check and updates the state accordingly.
   Future<void> _initConnectivity() async {
     final isConnected = await _connectivity.checkConnectivity();
     if (mounted) {
@@ -39,6 +62,8 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
     }
   }
 
+  /// Sets up a listener for connectivity changes and updates the state when
+  /// the connectivity status changes.
   void _setupConnectivityListener() {
     _connectivity.onConnectedChanged.listen((isConnected) {
       if (mounted) {
@@ -56,6 +81,7 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
       return const LoadingView();
     }
 
+    // Show error view if not connected to the internet
     if (!_isConnected) {
       if (widget.errorBuilder != null) {
         return widget.errorBuilder!(_initConnectivity);
@@ -66,6 +92,7 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
       );
     }
 
+    // Show the child widget if connected to the internet
     return widget.child;
   }
 }

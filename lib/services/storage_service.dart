@@ -1,3 +1,24 @@
+/// A service class that handles local storage operations for the application.
+/// This includes database operations for managing favorite meals and caching images.
+///
+/// The class uses SQLite for database operations and supports FFI for better
+/// cross-platform compatibility on Windows and Linux.
+///
+/// Methods:
+/// - `initializeFfi`: Initializes FFI for SQLite on Windows and Linux.
+/// - `database`: Getter for the database instance, initializes the database if not already done.
+/// - `_initDB`: Initializes the database and creates necessary tables.
+/// - `_createDB`: Creates the required tables in the database.
+/// - `addToFavorites`: Adds a meal to the favorites table.
+/// - `removeFromFavorites`: Removes a meal from the favorites table.
+/// - `isFavorite`: Checks if a meal is in the favorites table.
+/// - `getAllFavorites`: Retrieves all favorite meals from the database.
+/// - `getFavoriteMeal`: Retrieves a specific favorite meal by its ID.
+/// - `_getImageCacheDirectory`: Gets the directory where cached images are stored.
+/// - `getImagePath`: Gets the path for a cached image.
+/// - `cacheImage`: Caches an image by downloading it and saving it locally.
+/// - `removeImage`: Removes a cached image.
+/// - `cleanupUnusedImages`: Cleans up unused images from the cache.
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
