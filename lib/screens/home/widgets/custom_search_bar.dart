@@ -30,6 +30,8 @@
 /// The text field input is managed by a [TextEditingController], which is disposed of in the [dispose] method.
 import 'package:flutter/material.dart';
 
+import '../../../constants/text_constants.dart';
+
 class CustomSearchBar extends StatefulWidget {
   final Function(String, {bool byName, bool byIngredient}) onSearch;
 
@@ -75,7 +77,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 24.0),
-                child: Text('Filters'),
+                child: Text(TextConstants.filtersTitle),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18.0),
@@ -92,14 +94,14 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               CheckboxListTile(
-                title: const Text('Search by Name'),
+                title: const Text(TextConstants.searchByName),
                 value: _byName,
                 onChanged: (value) {
                   setState(() => _byName = value ?? false);
                 },
               ),
               CheckboxListTile(
-                title: const Text('Search by Ingredient'),
+                title: const Text(TextConstants.searchByIngredient),
                 value: _byIngredient,
                 onChanged: (value) {
                   setState(() => _byIngredient = value ?? false);
@@ -125,7 +127,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 child: TextField(
                   controller: _controller,
                   decoration: InputDecoration(
-                    hintText: 'Search recipes...',
+                    hintText: TextConstants.searchHint,
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/ui_constants.dart';
+import '../../../constants/text_constants.dart';
 import '../../favorites/favorites_page.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -9,10 +11,11 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     return SliverAppBar(
       floating: true,
       snap: true,
-      title: const Text('Recipe Explorer'),
+      title: const Text(TextConstants.appTitle),
       actions: [
         TextButton(
-          child: const Text('💕', style: TextStyle(fontSize: 22)),
+          child: const Text(TextConstants.addToFavoritesButton,
+              style: TextStyle(fontSize: UIConstants.titleFontSize)),
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const FavoritesPage()),

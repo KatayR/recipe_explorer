@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:recipe_explorer/constants/service_constants.dart';
 
 /// Service class for handling all API communications
 class ApiResponse<T> {
@@ -11,13 +12,20 @@ class ApiResponse<T> {
 
 class ApiService {
   // Base URL for the API
-  static const String baseUrl = 'https://www.themealdb.com/api/json/v1/1';
+  static const String baseUrl = ApiConstants.baseUrl;
+  static const String categoriesEndpoint = ApiConstants.categoriesEndpoint;
+  static const String searchByNameEndpoint = ApiConstants.searchByNameEndpoint;
+  static const String filterByCategoryEndpoint =
+      ApiConstants.filterByCategoryEndpoint;
+  static const String searchByIngredientEndpoint =
+      ApiConstants.searchByIngredientEndpoint;
 
   /// Fetches meal categories from the API
   /// Returns a list of category data or error message
   Future<ApiResponse<List<dynamic>>> getCategories() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/categories.php'));
+      final response =
+          await http.get(Uri.parse('$baseUrl/$categoriesEndpoint'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return ApiResponse(data: data['categories']);
@@ -33,7 +41,7 @@ class ApiService {
   Future<ApiResponse<List<dynamic>>> searchMealsByName(String query) async {
     try {
       final response =
-          await http.get(Uri.parse('$baseUrl/search.php?s=$query'));
+          await http.get(Uri.parse('$baseUrl/$searchByNameEndpoint$query'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return ApiResponse(data: data['meals'] ?? []);
@@ -49,8 +57,8 @@ class ApiService {
   Future<ApiResponse<List<dynamic>>> searchMealsByIngredient(
       String ingredient) async {
     try {
-      final response =
-          await http.get(Uri.parse('$baseUrl/filter.php?i=$ingredient'));
+      final response = await http
+          .get(Uri.parse('$baseUrl/$searchByIngredientEndpoint$ingredient'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return ApiResponse(data: data['meals'] ?? []);
@@ -65,8 +73,8 @@ class ApiService {
   /// [category] is the category name to filter by
   Future<ApiResponse<List<dynamic>>> getMealsByCategory(String category) async {
     try {
-      final response =
-          await http.get(Uri.parse('$baseUrl/filter.php?c=$category'));
+      final response = await http
+          .get(Uri.parse('$baseUrl/$filterByCategoryEndpoint$category'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return ApiResponse(data: data['meals'] ?? []);

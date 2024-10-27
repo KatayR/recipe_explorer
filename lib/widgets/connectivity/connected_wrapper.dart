@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/text_constants.dart';
 import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../services/connectivity_service.dart';
 import '../error/error_view.dart';
@@ -87,7 +88,7 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
         return widget.errorBuilder!(_initConnectivity);
       }
       return ErrorView(
-        errString: 'No internet connection',
+        errString: TextConstants.noInternetError,
         onRetry: _initConnectivity,
       );
     }

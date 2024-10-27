@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/text_constants.dart';
+import 'package:recipe_explorer/constants/ui_constants.dart';
 
 class RecipeInstructionsSection extends StatelessWidget {
   final String instructions;
@@ -14,7 +16,7 @@ class RecipeInstructionsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Instructions:',
+          TextConstants.instructionsTitle,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -23,7 +25,7 @@ class RecipeInstructionsSection extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           instructions,
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: UIConstants.bodyFontSize),
         ),
       ],
     );

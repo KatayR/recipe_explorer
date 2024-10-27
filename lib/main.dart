@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/text_constants.dart';
 import 'screens/home/home_page.dart';
 import 'services/storage_service.dart';
 
@@ -28,7 +29,7 @@ class RecipeExplorer extends StatelessWidget {
           PointerDeviceKind.trackpad,
         },
       ),
-      title: 'Recipe Explorer',
+      title: TextConstants.appTitle,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

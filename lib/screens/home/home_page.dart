@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_explorer/widgets/connectivity/connected_wrapper.dart';
 import '../../../services/api_service.dart';
+import '../../constants/text_constants.dart';
+import '../../constants/ui_constants.dart';
 import '../../widgets/error/error_view.dart';
 import 'widgets/app_bar.dart';
 import 'widgets/categories.dart';
@@ -62,7 +64,7 @@ class _HomePageState extends State<HomePage> {
               SliverFillRemaining(
                 child: Center(
                   child: ErrorView(
-                    errString: "Couldn't load homepage. Check your connection.",
+                    errString: TextConstants.loadError,
                     onRetry: retryCallback,
                   ),
                 ),
@@ -76,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(UIConstants.defaultPadding),
                       child: CustomSearchBar(onSearch: _searchMeals),
                     ),
                     CategoriesSection(

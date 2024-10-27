@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/ui_constants.dart';
 
 class RecipeMetadataSection extends StatelessWidget {
   final String category;
@@ -17,12 +18,12 @@ class RecipeMetadataSection extends StatelessWidget {
       children: [
         Text(
           'Category: $category',
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: UIConstants.bodyFontSize),
         ),
         const SizedBox(height: 4),
         Text(
           'Cuisine: $area',
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: UIConstants.bodyFontSize),
         ),
       ],
     );

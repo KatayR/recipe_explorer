@@ -23,6 +23,8 @@
 /// for that specific meal.
 
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/text_constants.dart';
+import 'package:recipe_explorer/constants/ui_constants.dart';
 import 'package:recipe_explorer/widgets/error/error_view.dart';
 import '../../../services/api_service.dart';
 import '../../../widgets/loading/loading_view.dart';
@@ -43,8 +45,8 @@ class DefaultRecipesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text("Sample dishes you can make with chicken",
+          padding: EdgeInsets.all(UIConstants.defaultPadding),
+          child: Text(TextConstants.defaultCategoryTitle,
               style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         Expanded(
@@ -56,8 +58,7 @@ class DefaultRecipesSection extends StatelessWidget {
               }
               if (snapshot.hasError || (snapshot.data?.error != null)) {
                 return const ErrorView(
-                  errString:
-                      'Error loading sample dishes. Check your connection and try again',
+                  errString: TextConstants.defaultCategoryError,
                 );
               }
               final meals = snapshot.data?.data ?? [];

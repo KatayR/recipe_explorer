@@ -18,6 +18,7 @@
 /// )
 /// ```
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/text_constants.dart';
 
 class ErrorView extends StatelessWidget {
   final VoidCallback? onRetry;
@@ -46,7 +47,7 @@ class ErrorView extends StatelessWidget {
           if (onRetry != null)
             ElevatedButton(
               onPressed: onRetry,
-              child: const Text('Try Again'),
+              child: const Text(TextConstants.tryAgainButton),
             ),
         ],
       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/text_constants.dart';
+import 'package:recipe_explorer/constants/ui_constants.dart';
 import 'package:recipe_explorer/widgets/error/error_view.dart';
 import '../../../services/api_service.dart';
 import '../../../services/favorites_service.dart';
@@ -63,8 +65,7 @@ class _RecipePageState extends State<RecipePage> {
     setState(() {
       _isLoading = false;
       if (response.error != null) {
-        _error =
-            'Unable to load recipe. Please check your internet connection.';
+        _error = TextConstants.recipeLoadingError;
       } else if (response.data != null && response.data!.isNotEmpty) {
         _meal = Meal.fromJson(response.data!.first);
       } else {
@@ -121,11 +122,11 @@ class _RecipePageState extends State<RecipePage> {
     }
 
     if (_meal == null) {
-      return const Center(child: Text('No meal details available'));
+      return const Center(child: Text(TextConstants.noMealDetailsError));
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(UIConstants.doublePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -137,11 +138,11 @@ class _RecipePageState extends State<RecipePage> {
               measures: _meal!.measures,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: UIConstants.defaultSpacing),
           RecipeInstructionsSection(
             instructions: _meal!.strInstructions,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: UIConstants.defaultSpacing),
           RecipeMetadataSection(
             category: _meal!.strCategory,
             area: _meal!.strArea,

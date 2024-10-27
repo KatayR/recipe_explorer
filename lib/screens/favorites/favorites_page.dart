@@ -16,6 +16,8 @@
 /// The favorite meals are displayed using the `MealGrid` widget, which
 /// expects the meals data in a map format.
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/text_constants.dart';
+import 'package:recipe_explorer/constants/ui_constants.dart';
 import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../../services/favorites_service.dart';
 import '../../models/meal_model.dart';
@@ -67,7 +69,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favorite Recipes'),
+        title: const Text(TextConstants.favoritesTitle),
       ),
       body: _buildBody(),
     );
@@ -88,17 +90,17 @@ class _FavoritesPageState extends State<FavoritesPage> {
               size: 64,
               color: Colors.grey,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: UIConstants.defaultSpacing),
             Text(
-              'No favorite recipes yet',
+              TextConstants.noFavoritesMessage,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: UIConstants.bodyFontSize,
                 color: Colors.grey,
               ),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: UIConstants.defaultPadding),
             Text(
-              'Add some recipes to your favorites!',
+              TextConstants.addFavoritesMessage,
               style: TextStyle(
                 color: Colors.grey,
               ),
