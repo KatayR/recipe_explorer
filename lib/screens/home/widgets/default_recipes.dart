@@ -31,8 +31,10 @@ class DefaultRecipesSection extends StatelessWidget {
                 return const LoadingView();
               }
               if (snapshot.hasError || (snapshot.data?.error != null)) {
-                return ErrorView(
-                    errString: snapshot.data?.error ?? 'Error loading recipes');
+                return const ErrorView(
+                  errString:
+                      'Error loading sample dishes. Check your connection and try again',
+                );
               }
               final meals = snapshot.data?.data ?? [];
               return MealGrid(
