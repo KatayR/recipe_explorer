@@ -12,6 +12,9 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+
+  // If you dont add the following ignore thingy, you will get a false-positive
+  // ignore: library_private_types_in_public_api
   _HomePageState createState() => _HomePageState();
 }
 
