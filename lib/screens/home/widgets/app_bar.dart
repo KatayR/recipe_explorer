@@ -15,7 +15,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: const Text('💕', style: TextStyle(fontSize: 22)),
           onPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => FavoritesPage()),
+            MaterialPageRoute(builder: (context) => const FavoritesPage()),
           ),
         ),
       ],
