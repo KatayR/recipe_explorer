@@ -1,3 +1,33 @@
+/// A custom search bar widget that allows users to search for recipes by name or ingredient.
+///
+/// The [CustomSearchBar] widget provides a text field for entering search queries and a button
+/// to open a filter dialog for selecting search criteria.
+///
+/// The [onSearch] callback is triggered when a search is performed, passing the search query
+/// and the selected search criteria.
+///
+/// The widget maintains the state of the search criteria (by name or by ingredient) and the
+/// text field input.
+///
+/// Example usage:
+///
+/// ```dart
+/// CustomSearchBar(
+///   onSearch: (query, {byName, byIngredient}) {
+///     // Handle search logic here
+///   },
+/// )
+/// ```
+///
+/// The filter dialog allows users to select whether to search by name, by ingredient, or both.
+/// The search criteria are stored in the [_byName] and [_byIngredient] state variables.
+///
+/// The [_handleSearch] method is called when a search is performed, and it triggers the [onSearch]
+/// callback with the current search query and criteria.
+///
+/// The [_showFilterDialog] method displays a dialog with checkboxes for selecting the search criteria.
+///
+/// The text field input is managed by a [TextEditingController], which is disposed of in the [dispose] method.
 import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatefulWidget {
@@ -44,8 +74,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Padding(
-                padding: EdgeInsets.only(
-                    left: 24.0), // Match default AlertDialog padding
+                padding: EdgeInsets.only(left: 24.0),
                 child: Text('Filters'),
               ),
               Padding(
