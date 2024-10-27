@@ -1,9 +1,94 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import '../../../widgets/loading/loading_view.dart';
-import '/models/category_model.dart';
-import '/utils/responsive_helper.dart';
+import '../../../widgets/error/error_view.dart';
+import '../../../services/api_service.dart';
+import '../../../models/category_model.dart';
+import '../../../utils/responsive_helper.dart';
+
+class CategoriesSection extends StatefulWidget {
+  final Function(String category) onCategorySelected;
+  final ApiService? apiService;
+
+  const CategoriesSection({
+    super.key,
+    required this.onCategorySelected,
+    this.apiService,
+  });
+
+  @override
+  State<CategoriesSection> createState() => _CategoriesSectionState();
+}
+
+class _CategoriesSectionState extends State<CategoriesSection> {
+  final ApiService _apiService;
+  List<Category> _categories = [];
+  bool _isLoading = true;
+  String? _error;
+
+  _CategoriesSectionState() : _apiService = ApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      final response = await _apiService.getCategories();
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          if (response.error != null) {
+            _error = response.error;
+          } else if (response.data != null) {
+            _categories =
+                response.data!.map((json) => Category.fromJson(json)).toList();
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _error = 'Failed to load categories. Please check your connection.';
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const SizedBox(
+        height: 120,
+        child: Center(child: LoadingView()),
+      );
+    }
+
+    if (_error != null) {
+      return SizedBox(
+        height: 120,
+        child: ErrorView(
+          errString: _error!,
+          onRetry: _loadCategories,
+        ),
+      );
+    }
+
+    return CategoryList(
+      categories: _categories,
+      onCategorySelected: widget.onCategorySelected,
+    );
+  }
+}
 
 class CategoryList extends StatefulWidget {
   final List<Category> categories;
