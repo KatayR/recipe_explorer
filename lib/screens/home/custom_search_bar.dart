@@ -35,6 +35,42 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
     }
   }
 
+  void _showFilterDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Search Filters'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CheckboxListTile(
+                title: const Text('Search by Name'),
+                value: _byName,
+                onChanged: (value) {
+                  setState(() => _byName = value ?? false);
+                },
+              ),
+              CheckboxListTile(
+                title: const Text('Search by Ingredient'),
+                value: _byIngredient,
+                onChanged: (value) {
+                  setState(() => _byIngredient = value ?? false);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -58,22 +94,9 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 ),
               ),
               const SizedBox(width: 8),
-              PopupMenuButton<void>(
+              IconButton(
                 icon: const Icon(Icons.tune),
-                itemBuilder: (context) => [
-                  CheckedPopupMenuItem(
-                    value: null,
-                    checked: _byName,
-                    onTap: () => setState(() => _byName = !_byName),
-                    child: const Text('Search by Name'),
-                  ),
-                  CheckedPopupMenuItem(
-                    value: null,
-                    checked: _byIngredient,
-                    onTap: () => setState(() => _byIngredient = !_byIngredient),
-                    child: const Text('Search by Ingredient'),
-                  ),
-                ],
+                onPressed: () => _showFilterDialog(context),
               ),
             ],
           ),
