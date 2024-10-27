@@ -92,16 +92,20 @@ class ApiService {
       // Search by name if enabled
       if (searchByName) {
         final nameResponse = await searchMealsByName(query);
-        if (nameResponse.data != null) {
+        if (nameResponse.error == null) {
           results.addAll(nameResponse.data!);
+        } else {
+          return nameResponse;
         }
       }
 
       // Search by ingredient if enabled
       if (searchByIngredient) {
         final ingredientResponse = await searchMealsByIngredient(query);
-        if (ingredientResponse.data != null) {
+        if (ingredientResponse.error == null) {
           results.addAll(ingredientResponse.data!);
+        } else {
+          return ingredientResponse;
         }
       }
 
