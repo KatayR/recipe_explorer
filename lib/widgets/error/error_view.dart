@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../../utils/error_handler.dart';
 
 class ErrorView extends StatelessWidget {
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
   final String errString;
 
   const ErrorView({
     super.key,
-    required this.onRetry,
+    this.onRetry,
     required this.errString,
   });
 
@@ -17,12 +16,19 @@ class ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ErrorHandler.buildErrorWidget(errString),
+          Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Try Again'),
+          Text(
+            errString,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16),
           ),
+          const SizedBox(height: 16),
+          if (onRetry != null)
+            ElevatedButton(
+              onPressed: onRetry,
+              child: const Text('Try Again'),
+            ),
         ],
       ),
     );
