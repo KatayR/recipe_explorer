@@ -65,45 +65,39 @@ class _ResultsPageState extends State<ResultsPage> {
       _error = null;
     });
 
-    try {
-      ApiResponse<List<dynamic>> response;
+    ApiResponse<List<dynamic>> response;
 
-      if (widget.searchQuery != null) {
-        // Handle search
-        response = await _apiService.searchMeals(
-          query: widget.searchQuery!,
-          searchByName: widget.searchByName,
-          searchByIngredient: widget.searchByIngredient,
-        );
-      } else if (widget.categoryName != null) {
-        // Handle category selection
-        response = await _apiService.getMealsByCategory(widget.categoryName!);
-      } else {
-        throw Exception(
-            'Either searchQuery or categoryName must be provided'); // This should never happen, but just in case
-      }
-
-      if (response.error != null) {
-        setState(() {
-          _error = "Check your connection status and try again";
-          _isLoading = false;
-        });
-        return;
-      }
-
-      _allMeals = response.data ?? [];
-      _loadNextBatch();
-
-      setState(() {
-        _isLoading = false;
-        _hasMore = _displayedMeals.length < _allMeals.length;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+    if (widget.searchQuery != null) {
+      // Handle search
+      response = await _apiService.searchMeals(
+        query: widget.searchQuery!,
+        searchByName: widget.searchByName,
+        searchByIngredient: widget.searchByIngredient,
+      );
+    } else if (widget.categoryName != null) {
+      // Handle category selection
+      response = await _apiService.getMealsByCategory(widget.categoryName!);
+    } else {
+      throw Exception(
+          'Either searchQuery or categoryName must be provided'); // This should never happen, but just in case
     }
+
+    if (response.error != null) {
+      setState(() {
+        _error = "Check your connection status and try again";
+        _isLoading = false;
+      });
+      return;
+    }
+
+    _allMeals = response.data ?? [];
+    print('All meals length: ${_allMeals.length}');
+    _loadNextBatch();
+
+    setState(() {
+      _isLoading = false;
+      _hasMore = _displayedMeals.length < _allMeals.length;
+    });
   }
 
   void _loadNextBatch() {
@@ -113,11 +107,15 @@ class _ResultsPageState extends State<ResultsPage> {
     setState(() => _isLoadingMore = true);
 
     final currentLength = _displayedMeals.length;
+    print('Current length: $currentLength');
     final nextBatch = _allMeals.skip(currentLength).take(_batchSize).toList();
+    print('Next batch length: ${nextBatch.length}');
 
     setState(() {
       _displayedMeals.addAll(nextBatch);
+      print('New displayed meals length: ${_displayedMeals.length}');
       _hasMore = _displayedMeals.length < _allMeals.length;
+      print('Has more: $_hasMore');
       _isLoadingMore = false;
     });
   }
@@ -163,7 +161,7 @@ class _ResultsPageState extends State<ResultsPage> {
     }
 
     if (_displayedMeals.isEmpty) {
-      return const Center(child: Text('No results found'));
+      return const Center(child: Text('No ressults found'));
     }
 
     return PaginatedResults(
