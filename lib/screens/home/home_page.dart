@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../services/api_service.dart';
 import '../../models/category_model.dart';
-import 'categories.dart';
-import 'custom_search_bar.dart';
+import '../../services/api_service.dart';
 import '../../widgets/meal/meal_grid.dart';
 import '../favorites/favorites_page.dart';
 import '../recipe/recipe_page.dart';
 import '../results/results_page.dart';
 import '../../../utils/error_handler.dart';
+import 'widgets/categories.dart';
+import 'widgets/custom_search_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
