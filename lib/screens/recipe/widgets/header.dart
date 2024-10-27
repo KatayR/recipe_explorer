@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/ui_constants.dart';
 import '../../../utils/responsive_helper.dart';
 import '../../../widgets/meal/meal_image.dart';
 
@@ -51,7 +52,7 @@ class RecipeHeader extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: UIConstants.defaultSpacing),
         Expanded(child: ingredientsSection),
       ],
     );

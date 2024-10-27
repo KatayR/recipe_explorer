@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../constants/text_constants.dart';
 import '../../services/image_cache.dart';
 import '../loading/loading_view.dart';
 
@@ -110,7 +111,7 @@ class _MealImageState extends State<MealImage> {
         children: [
           Icon(Icons.error, color: Colors.red),
           SizedBox(height: 8),
-          Text('Failed to load image'),
+          Text(TextConstants.imageLoadError),
         ],
       ),
     );

@@ -37,6 +37,7 @@
 /// );
 /// ```
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/text_constants.dart';
 import '../../../services/api_service.dart';
 import '../../models/meal_model.dart';
 import '../../widgets/error/error_view.dart';
@@ -134,7 +135,7 @@ class _ResultsPageState extends State<ResultsPage> {
 
     if (response.error != null) {
       setState(() {
-        _error = "Check your connection status and try again";
+        _error = TextConstants.loadError;
         _isLoading = false;
       });
       return;
@@ -181,11 +182,11 @@ class _ResultsPageState extends State<ResultsPage> {
   // Method to get the title of the page based on search query or category
   String _getPageTitle() {
     if (widget.searchQuery != null) {
-      return 'Search Results: ${widget.searchQuery}';
+      return '${TextConstants.searchResultsTitle}: ${widget.searchQuery}';
     } else if (widget.categoryName != null) {
-      return 'Category: ${widget.categoryName}';
+      return '${TextConstants.categoryLabel}: ${widget.categoryName}';
     }
-    return 'Results';
+    return TextConstants.genericResultsTitle;
   }
 
   @override
@@ -209,7 +210,7 @@ class _ResultsPageState extends State<ResultsPage> {
     }
 
     if (_displayedMeals.isEmpty) {
-      return const ErrorView(errString: 'No results found');
+      return const ErrorView(errString: TextConstants.noResultsError);
     }
 
     return PaginatedResults(

@@ -20,6 +20,8 @@
 ///   HTTP GET request to verify internet access.
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:recipe_explorer/constants/service_constants.dart';
+import 'package:recipe_explorer/services/api_service.dart';
 
 class ConnectivityService {
   static final ConnectivityService instance = ConnectivityService._init();
@@ -54,7 +56,7 @@ class ConnectivityService {
     try {
       final response = await http
           .get(
-            Uri.parse('https://www.themealdb.com/api/json/v1/1/random.php'),
+            Uri.parse(ApiConstants.baseUrl + ApiConstants.randomMealEndpoint),
           )
           .timeout(
             const Duration(seconds: 5),

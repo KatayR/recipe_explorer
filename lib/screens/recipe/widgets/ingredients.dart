@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/constants/text_constants.dart';
 
 class RecipeIngredientsSection extends StatelessWidget {
   final List<String> ingredients;
@@ -16,7 +17,7 @@ class RecipeIngredientsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Ingredients:',
+          TextConstants.ingredientsTitle,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
