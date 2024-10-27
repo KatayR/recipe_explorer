@@ -5,6 +5,7 @@ import 'screens/home/home_page.dart';
 import 'services/storage_service.dart';
 
 void main() async {
+  // Ensure Flutter bindings are initialized before using platform channels
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the FFI database
@@ -19,6 +20,7 @@ class RecipeExplorer extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      // Configure scroll behavior to support multiple input devices
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
           PointerDeviceKind.mouse,
