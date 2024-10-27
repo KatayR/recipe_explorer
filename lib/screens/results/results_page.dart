@@ -58,7 +58,10 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   Future<void> _loadInitialResults() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
 
     try {
       ApiResponse<List<dynamic>> response;
@@ -144,7 +147,8 @@ class _ResultsPageState extends State<ResultsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ErrorHandler.buildErrorWidget(_error!),
+            ErrorHandler.buildErrorWidget(
+                "Check your connection status and try again"),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadInitialResults,
