@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_explorer/models/meal_model.dart';
+import '../loading/loading_view.dart';
 import 'meal_card.dart';
 import '../../utils/responsive_helper.dart';
 
@@ -33,9 +34,7 @@ class MealGrid extends StatelessWidget {
       itemCount: meals.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == meals.length) {
-          return isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : const SizedBox();
+          return isLoading ? const LoadingView() : const SizedBox();
         }
 
         return MealCard(

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../services/image_cache.dart';
+import '../loading/loading_view.dart';
 
 class MealImage extends StatefulWidget {
   final String mealId;
@@ -74,7 +75,7 @@ class _MealImageState extends State<MealImage> {
       return SizedBox(
         width: widget.width,
         height: widget.height,
-        child: const Center(child: CircularProgressIndicator()),
+        child: const LoadingView(),
       );
     }
 

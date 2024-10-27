@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/widgets/error/error_view.dart';
 import '../../../services/api_service.dart';
 import '../../../services/favorites_service.dart';
 import '../../models/meal_model.dart';
-import 'ingredients.dart';
-import 'instructions.dart';
+import '../../widgets/loading/loading_view.dart';
+import 'widgets/instructions.dart';
 import 'widgets/header.dart';
+import 'widgets/ingredients.dart';
 import 'widgets/metadata.dart';
 
 class RecipePage extends StatefulWidget {
@@ -101,23 +103,11 @@ class _RecipePageState extends State<RecipePage> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingView();
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(_error!, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadMealDetails,
-              child: const Text('Try Again'),
-            ),
-          ],
-        ),
-      );
+      return ErrorView(onRetry: _loadMealDetails, errString: _error!);
     }
 
     if (_meal == null) {

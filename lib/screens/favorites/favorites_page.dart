@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../../services/favorites_service.dart';
 import '../../models/meal_model.dart';
 import '../../widgets/meal/meal_grid.dart';
@@ -57,7 +58,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingView();
     }
 
     if (_favoriteMeals.isEmpty) {
