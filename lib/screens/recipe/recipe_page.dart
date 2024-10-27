@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../../../services/api_service.dart';
 import '../../../services/favorites_service.dart';
 import '../../models/meal_model.dart';
-import 'header.dart';
 import 'ingredients.dart';
 import 'instructions.dart';
-import 'metadata.dart';
+import 'widgets/header.dart';
+import 'widgets/metadata.dart';
 
 class RecipePage extends StatefulWidget {
   final String mealId;
