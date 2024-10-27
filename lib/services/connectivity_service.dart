@@ -21,7 +21,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:recipe_explorer/constants/service_constants.dart';
-import 'package:recipe_explorer/services/api_service.dart';
 
 class ConnectivityService {
   static final ConnectivityService instance = ConnectivityService._init();
