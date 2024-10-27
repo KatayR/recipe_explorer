@@ -1,3 +1,20 @@
+/// A widget that displays a section of categories, allowing users to select a category.
+///
+/// The [CategoriesSection] widget fetches categories from an API service and displays them
+/// in a horizontal list. It handles loading and error states, and allows users to select
+/// a category.
+///
+/// The [onCategorySelected] callback is triggered when a category is selected.
+///
+/// The [apiService] parameter can be used to provide a custom API service for fetching
+/// categories. If not provided, a default [ApiService] instance is used.
+///
+/// The [CategoriesSection] widget is stateful and manages its own state, including
+/// loading, error, and category data.
+///
+
+// Yes, this is a rather large snippet, but it's all related to the same widget.
+
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../../../widgets/loading/loading_view.dart';
@@ -7,7 +24,9 @@ import '../../../models/category_model.dart';
 import '../../../utils/responsive_helper.dart';
 
 class CategoriesSection extends StatefulWidget {
+  /// Callback function triggered when a category is selected.
   final Function(String category) onCategorySelected;
+
   final ApiService? apiService;
 
   const CategoriesSection({
@@ -21,11 +40,19 @@ class CategoriesSection extends StatefulWidget {
 }
 
 class _CategoriesSectionState extends State<CategoriesSection> {
+  /// API service for fetching categories.
   final ApiService _apiService;
+
+  /// List of categories fetched from the API.
   List<Category> _categories = [];
+
+  /// Indicates whether the categories are currently being loaded.
   bool _isLoading = true;
+
+  /// Error message, if any, encountered while loading categories.
   String? _error;
 
+  /// Initializes the state of the [CategoriesSection] widget.
   _CategoriesSectionState() : _apiService = ApiService();
 
   @override
@@ -34,6 +61,10 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     _loadCategories();
   }
 
+  /// Loads categories from the API service.
+  ///
+  /// This method fetches categories from the API service and updates the state
+  /// accordingly. It handles loading and error states.
   Future<void> _loadCategories() async {
     try {
       setState(() {
@@ -90,10 +121,21 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   }
 }
 
+/// A widget that displays a list of categories in a horizontal scrollable view.
+///
+/// The [CategoryList] widget displays a list of categories and allows users to
+/// select a category. It includes scroll arrows for navigating the list.
+///
+/// The [categories] parameter specifies the list of categories to display.
+/// The [onCategorySelected] callback is triggered when a category is selected.
 class CategoryList extends StatefulWidget {
+  /// List of categories to display.
   final List<Category> categories;
+
+  /// Callback function triggered when a category is selected.
   final Function(String category) onCategorySelected;
 
+  /// Creates a [CategoryList] widget.
   const CategoryList({
     super.key,
     required this.categories,
@@ -105,8 +147,13 @@ class CategoryList extends StatefulWidget {
 }
 
 class _CategoryListState extends State<CategoryList> {
+  /// Scroll controller for the horizontal list view.
   final ScrollController _scrollController = ScrollController();
+
+  /// Indicates whether the left scroll arrow should be shown.
   bool _showLeftArrow = false;
+
+  /// Indicates whether the right scroll arrow should be shown.
   bool _showRightArrow = true;
 
   @override
@@ -121,6 +168,7 @@ class _CategoryListState extends State<CategoryList> {
     super.dispose();
   }
 
+  /// Updates the visibility of the scroll arrows based on the scroll position.
   void _updateArrows() {
     setState(() {
       _showLeftArrow = _scrollController.position.pixels > 0;
@@ -129,6 +177,10 @@ class _CategoryListState extends State<CategoryList> {
     });
   }
 
+  /// Scrolls the list view in the specified direction.
+  ///
+  /// The [direction] parameter specifies the direction to scroll.
+  /// A positive value scrolls to the right, and a negative value scrolls to the left.
   void _scroll(double direction) {
     _scrollController.animateTo(
       _scrollController.offset + (direction * 200),
@@ -197,10 +249,22 @@ class _CategoryListState extends State<CategoryList> {
   }
 }
 
+/// A widget that displays a scroll arrow for navigating a list view.
+///
+/// The [_ScrollArrow] widget displays a scroll arrow and handles tap events
+/// to scroll the list view in the specified direction.
+///
+/// The [direction] parameter specifies the direction to scroll.
+/// A positive value scrolls to the right, and a negative value scrolls to the left.
+/// The [onTap] callback is triggered when the arrow is tapped.
 class _ScrollArrow extends StatelessWidget {
+  /// Direction to scroll when the arrow is tapped.
   final int direction;
+
+  /// Callback function triggered when the arrow is tapped.
   final VoidCallback onTap;
 
+  /// Creates a [_ScrollArrow] widget.
   const _ScrollArrow({
     required this.direction,
     required this.onTap,
@@ -241,8 +305,17 @@ class _ScrollArrow extends StatelessWidget {
   }
 }
 
+/// A widget that displays a single category item.
+///
+/// The [CategoryItem] widget displays a category item with an image and text.
+/// It handles tap events to trigger the [onTap] callback.
+///
+/// The [category] parameter specifies the category to display.
+/// The [onTap] callback is triggered when the category item is tapped.
 class CategoryItem extends StatelessWidget {
   final Category category;
+
+  /// Callback function triggered when the category item is tapped.
   final VoidCallback onTap;
 
   const CategoryItem({
