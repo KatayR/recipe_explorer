@@ -19,7 +19,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final ApiService _apiService = ApiService();
   List<Category> _categories = [];
-  bool _showSearch = false;
   bool _isLoadingCategories = true;
 
   @override
@@ -70,10 +69,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Recipe Explorer'),
         actions: [
-          IconButton(
-            icon: Icon(_showSearch ? Icons.close : Icons.search),
-            onPressed: () => setState(() => _showSearch = !_showSearch),
-          ),
           TextButton(
             child: const Text('💕', style: TextStyle(fontSize: 22)),
             onPressed: () => Navigator.push(
@@ -86,11 +81,10 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           // Search Bar
-          if (_showSearch)
-            CustomSearchBar(
-              onSearch: _searchMeals,
-              onClose: () => setState(() => _showSearch = false),
-            ),
+
+          CustomSearchBar(
+            onSearch: _searchMeals,
+          ),
 
           // Categories
           if (_isLoadingCategories)
