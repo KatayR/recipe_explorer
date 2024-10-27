@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../services/api_service.dart';
-import '../../../utils/error_handler.dart';
-import '../../widgets/meal/meal_grid.dart';
+import '../../models/meal_model.dart';
+import '../../widgets/error/error_view.dart';
+import '../../widgets/loading/loading_view.dart';
 import '../recipe/recipe_page.dart';
+import 'widgets/paginated_results.dart';
 
 class ResultsPage extends StatefulWidget {
   final String? searchQuery;
@@ -83,7 +85,7 @@ class _ResultsPageState extends State<ResultsPage> {
 
       if (response.error != null) {
         setState(() {
-          _error = response.error;
+          _error = "Check your connection status and try again";
           _isLoading = false;
         });
         return;
@@ -120,6 +122,18 @@ class _ResultsPageState extends State<ResultsPage> {
     });
   }
 
+  void _navigateToRecipe(Meal meal) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecipePage(
+          mealId: meal.idMeal,
+          mealName: meal.strMeal,
+        ),
+      ),
+    );
+  }
+
   String _getPageTitle() {
     if (widget.searchQuery != null) {
       return 'Search Results: ${widget.searchQuery}';
@@ -141,47 +155,22 @@ class _ResultsPageState extends State<ResultsPage> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingView();
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ErrorHandler.buildErrorWidget(
-                "Check your connection status and try again"),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadInitialResults,
-              child: const Text('Try Again'),
-            ),
-          ],
-        ),
-      );
+      return ErrorView(onRetry: _loadInitialResults, errString: _error!);
     }
 
     if (_displayedMeals.isEmpty) {
-      return const Center(
-        child: Text('No results found'),
-      );
+      return const Center(child: Text('No results found'));
     }
 
-    return MealGrid(
-      meals: _displayedMeals,
-      onMealSelected: (meal) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RecipePage(
-              mealId: meal.idMeal,
-              mealName: meal.strMeal,
-            ),
-          ),
-        );
-      },
+    return PaginatedResults(
+      displayedMeals: _displayedMeals,
+      onMealSelected: _navigateToRecipe,
       scrollController: _scrollController,
-      isLoading: _isLoadingMore,
+      isLoadingMore: _isLoadingMore,
       hasMore: _hasMore,
     );
   }
