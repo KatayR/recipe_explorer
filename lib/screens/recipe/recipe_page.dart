@@ -44,35 +44,28 @@ class _RecipePageState extends State<RecipePage> {
       _error = null;
     });
 
-    try {
-      final savedMeal = await _favoritesService.loadMealIfSaved(widget.mealId);
-      if (savedMeal != null) {
-        setState(() {
-          _meal = savedMeal;
-          _isFavorite = true;
-          _isLoading = false;
-        });
-        return;
-      }
-
-      final response = await _apiService.searchMealsByName(widget.mealName);
+    final savedMeal = await _favoritesService.loadMealIfSaved(widget.mealId);
+    if (savedMeal != null) {
       setState(() {
+        _meal = savedMeal;
+        _isFavorite = true;
         _isLoading = false;
-        if (response.error != null) {
-          _error =
-              'Unable to load recipe. Please check your internet connection.';
-        } else if (response.data != null && response.data!.isNotEmpty) {
-          _meal = Meal.fromJson(response.data!.first);
-        } else {
-          _error = 'Meal not found';
-        }
       });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _error = 'An error occurred. Please try again later.';
-      });
+      return;
     }
+
+    final response = await _apiService.searchMealsByName(widget.mealName);
+    setState(() {
+      _isLoading = false;
+      if (response.error != null) {
+        _error =
+            'Unable to load recipe. Please check your internet connection.';
+      } else if (response.data != null && response.data!.isNotEmpty) {
+        _meal = Meal.fromJson(response.data!.first);
+      } else {
+        _error = 'Meal not found';
+      }
+    });
   }
 
   Future<void> _toggleFavorite() async {
