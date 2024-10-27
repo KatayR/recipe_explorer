@@ -155,7 +155,7 @@ class _ResultsPageState extends State<ResultsPage> {
     }
 
     if (_displayedMeals.isEmpty) {
-      return const Center(child: Text('No ressults found'));
+      return const ErrorView(errString: 'No results found');
     }
 
     return PaginatedResults(
