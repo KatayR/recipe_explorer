@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../loading/loading_view.dart';
 import 'meal_list_item.dart';
 
 class PaginatedMealList extends StatelessWidget {
@@ -28,7 +29,7 @@ class PaginatedMealList extends StatelessWidget {
               ? Container(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   alignment: Alignment.center,
-                  child: const CircularProgressIndicator(),
+                  child: const LoadingView(),
                 )
               : const SizedBox.shrink();
         }

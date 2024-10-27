@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import '../../../widgets/loading/loading_view.dart';
 import '/models/category_model.dart';
 import '/utils/responsive_helper.dart';
 
@@ -185,9 +186,7 @@ class CategoryItem extends StatelessWidget {
                   if (loadingProgress == null) return child;
                   return SizedBox(
                     height: isDesktop ? 70 : 50,
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: const LoadingView(),
                   );
                 },
               ),
