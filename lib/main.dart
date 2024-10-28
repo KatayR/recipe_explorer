@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_explorer/constants/text_constants.dart';
 import 'screens/home/home_page.dart';
 import 'services/storage_service.dart';
@@ -11,7 +12,9 @@ void main() async {
 
   // Initialize the FFI database
   await StorageService.initializeFfi();
-  runApp(const RecipeExplorer());
+
+  // Run the app with riverpod's scope
+  runApp(const ProviderScope(child: RecipeExplorer()));
 }
 
 class RecipeExplorer extends StatelessWidget {

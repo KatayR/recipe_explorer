@@ -1,122 +1,79 @@
-/// A stateful widget that displays the user's favorite recipes.
+/// A page that displays the user's favorite meals. This page uses the
+/// `ConsumerWidget` from Riverpod to listen to the `favoriteMealsProvider`
+/// and update the UI accordingly.
 ///
-/// The `FavoritesPage` widget fetches and displays a list of favorite meals
-/// from the `FavoritesService`. It shows a loading indicator while the data
-/// is being fetched and displays a message if no favorite recipes are found.
+/// The page shows a loading view while the favorite meals are being fetched,
+/// an error view if there is an error during fetching, and a grid of meals
+/// if the data is successfully fetched. If there are no favorite meals,
+/// a message encouraging the user to add favorites is displayed.
 ///
-/// When a meal is selected, it navigates to the `RecipePage` to show the
-/// details of the selected meal. Upon returning from the `RecipePage`, the
-/// list of favorite meals is refreshed.
-///
-/// The widget consists of:
-/// - An `AppBar` with the title "Favorite Recipes".
-/// - A body that shows either a loading indicator, a message indicating no
-///   favorite recipes, or a grid of favorite meals.
-///
-/// The favorite meals are displayed using the `MealGrid` widget, which
-/// expects the meals data in a map format.
+/// The user can tap on a meal to navigate to the `RecipePage` for that meal.
 import 'package:flutter/material.dart';
-import 'package:recipe_explorer/constants/text_constants.dart';
-import 'package:recipe_explorer/constants/ui_constants.dart';
-import 'package:recipe_explorer/widgets/loading/loading_view.dart';
-import '../../../services/favorites_service.dart';
-import '../../models/meal_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../constants/text_constants.dart';
+import '../../constants/ui_constants.dart';
+import '../../services/favorites_provider.dart';
+import '../../widgets/error/error_view.dart';
+import '../../widgets/loading/loading_view.dart';
 import '../../widgets/meal/meal_grid.dart';
 import '../recipe/recipe_page.dart';
 
-class FavoritesPage extends StatefulWidget {
+class FavoritesPage extends ConsumerWidget {
   const FavoritesPage({super.key});
 
   @override
-  State<FavoritesPage> createState() => _FavoritesPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    /// Watches the state of the favorite meals provider and assigns it to the `favoritesState` variable.
+    ///
+    /// This allows the widget to reactively rebuild whenever the state of the favorite meals changes.
+    final favoritesState = ref.watch(favoriteMealsProvider);
 
-class _FavoritesPageState extends State<FavoritesPage> {
-  final FavoritesService _favoritesService = FavoritesService();
-  List<Meal> _favoriteMeals = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadFavorites();
-  }
-
-  Future<void> _loadFavorites() async {
-    setState(() => _isLoading = true);
-
-    final meals = await _favoritesService.getFavorites();
-
-    setState(() {
-      _favoriteMeals = meals;
-      _isLoading = false;
-    });
-  }
-
-  void _onMealSelected(Meal meal) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RecipePage(
-          mealId: meal.idMeal,
-          mealName: meal.strMeal,
-        ),
-      ),
-    ).then((_) => _loadFavorites()); // Refresh list when returning
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(TextConstants.favoritesTitle),
       ),
-      body: _buildBody(),
-    );
-  }
+      body: favoritesState.when(
+        loading: () => const LoadingView(),
+        error: (error, _) => ErrorView(
+          errString: TextConstants.loadError,
+          onRetry: () =>
 
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const LoadingView();
-    }
-
-    if (_favoriteMeals.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite_border,
-              size: 64,
-              color: Colors.grey,
-            ),
-            SizedBox(height: UIConstants.defaultSpacing),
-            Text(
-              TextConstants.noFavoritesMessage,
-              style: TextStyle(
-                fontSize: UIConstants.bodyFontSize,
-                color: Colors.grey,
-              ),
-            ),
-            SizedBox(height: UIConstants.defaultPadding),
-            Text(
-              TextConstants.addFavoritesMessage,
-              style: TextStyle(
-                color: Colors.grey,
-              ),
-            ),
-          ],
+              /// Loads the favorite meals using the `favoriteMealsProvider` notifier.
+              ///
+              /// This method reads the `favoriteMealsProvider` and triggers the
+              /// `loadFavorites` function to fetch and update the list of favorite meals.
+              ref.read(favoriteMealsProvider.notifier).loadFavorites(),
         ),
-      );
-    }
+        data: (meals) {
+          if (meals.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.favorite_border, size: 64, color: Colors.grey),
+                  SizedBox(height: UIConstants.defaultSpacing),
+                  Text(TextConstants.noFavoritesMessage),
+                  SizedBox(height: UIConstants.defaultPadding),
+                  Text(TextConstants.addFavoritesMessage),
+                ],
+              ),
+            );
+          }
 
-    // Convert Meal objects to map format expected by MealGrid
-    final mealsData = _favoriteMeals.map((meal) => meal.toJson()).toList();
-
-    return MealGrid(
-      meals: mealsData,
-      onMealSelected: _onMealSelected,
-      // No need for pagination here as favorites are usually fewer
+          return MealGrid(
+            meals: meals.map((meal) => meal.toJson()).toList(),
+            onMealSelected: (meal) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RecipePage(
+                  mealId: meal.idMeal,
+                  mealName: meal.strMeal,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

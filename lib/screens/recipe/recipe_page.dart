@@ -1,17 +1,30 @@
+/// A page that displays the details of a recipe.
+///
+/// The [RecipePage] is a [ConsumerStatefulWidget] that fetches and displays
+/// the details of a meal based on the provided [mealId] and [mealName].
+///
+/// The page first attempts to load the meal details from the favorites provider.
+/// If the meal is not found in the favorites, it fetches the details from an API.
+///
+/// The page also allows the user to add or remove the meal from their favorites.
+///
+/// The UI consists of a loading view, an error view, or the meal details
+/// including the header, ingredients, instructions, and metadata sections.
 import 'package:flutter/material.dart';
-import 'package:recipe_explorer/constants/text_constants.dart';
-import 'package:recipe_explorer/constants/ui_constants.dart';
-import 'package:recipe_explorer/widgets/error/error_view.dart';
-import '../../../services/api_service.dart';
-import '../../../services/favorites_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../constants/text_constants.dart';
+import '../../constants/ui_constants.dart';
 import '../../models/meal_model.dart';
+import '../../services/api_service.dart';
+import '../../services/favorites_provider.dart';
+import '../../widgets/error/error_view.dart';
 import '../../widgets/loading/loading_view.dart';
-import 'widgets/instructions.dart';
 import 'widgets/header.dart';
 import 'widgets/ingredients.dart';
+import 'widgets/instructions.dart';
 import 'widgets/metadata.dart';
 
-class RecipePage extends StatefulWidget {
+class RecipePage extends ConsumerStatefulWidget {
   final String mealId;
   final String mealName;
 
@@ -22,16 +35,13 @@ class RecipePage extends StatefulWidget {
   });
 
   @override
-  State<RecipePage> createState() => _RecipePageState();
+  ConsumerState<RecipePage> createState() => _RecipePageState();
 }
 
-class _RecipePageState extends State<RecipePage> {
+class _RecipePageState extends ConsumerState<RecipePage> {
   final ApiService _apiService = ApiService();
-  final FavoritesService _favoritesService = FavoritesService();
-
   Meal? _meal;
   bool _isLoading = true;
-  bool _isFavorite = false;
   String? _error;
 
   @override
@@ -40,27 +50,29 @@ class _RecipePageState extends State<RecipePage> {
     _loadMealDetails();
   }
 
-  /// Loads the details of the meal.
-  ///
-  /// This method first checks if the meal is saved as a favorite. If it is,
-  /// it loads the saved details. Otherwise, it fetches the meal details from
-  /// the API. If an error occurs during the fetch, an error message is displayed.
   Future<void> _loadMealDetails() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
-    final savedMeal = await _favoritesService.loadMealIfSaved(widget.mealId);
-    if (savedMeal != null) {
-      setState(() {
-        _meal = savedMeal;
-        _isFavorite = true;
-        _isLoading = false;
-      });
-      return;
+    // Try to load from favorites first
+    final favoritesState = ref.read(favoriteMealsProvider);
+    if (favoritesState is AsyncData && favoritesState.value != null) {
+      final savedMeal = favoritesState.value
+          ?.where((meal) => meal.idMeal == widget.mealId)
+          .firstOrNull;
+
+      if (savedMeal != null) {
+        setState(() {
+          _meal = savedMeal;
+          _isLoading = false;
+        });
+        return;
+      }
     }
 
+    // If not in favorites, load from API
     final response = await _apiService.searchMealsByName(widget.mealName);
     setState(() {
       _isLoading = false;
@@ -74,30 +86,42 @@ class _RecipePageState extends State<RecipePage> {
     });
   }
 
-  /// Toggles the favorite status of the meal.
-  ///
-  /// This method updates the favorite status of the meal by calling the
-  /// [FavoritesService]. If the meal is marked as a favorite, it is saved;
-  /// otherwise, it is removed from the favorites.
-  Future<void> _toggleFavorite() async {
-    if (_meal == null) return;
-    final newStatus = await _favoritesService.toggleFavorite(_meal!);
-    setState(() => _isFavorite = newStatus);
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Watch favorites state to automatically rebuild when it changes
+    final favoritesState = ref.watch(favoriteMealsProvider);
+
+    // Determine if this meal is in favorites
+    final isFavorite = favoritesState.whenOrNull(
+          data: (meals) => meals.any((meal) => meal.idMeal == widget.mealId),
+        ) ??
+        false;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.mealName),
         actions: [
+          /// Displays a favorite icon button if `_meal` is not null.
+          ///
+          /// The icon changes based on the `isFavorite` state:
+          /// - If `isFavorite` is true, the icon is a filled heart (favorite) with red color.
+          /// - If `isFavorite` is false, the icon is an outlined heart (favorite_border).
+          ///
+          /// When the button is pressed, it toggles the favorite status of `_meal`
+          /// by calling `toggleFavorite` on the `favoriteMealsProvider` notifier.
           if (_meal != null)
             IconButton(
               icon: Icon(
-                _isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: _isFavorite ? Colors.red : null,
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: isFavorite ? Colors.red : null,
               ),
-              onPressed: _toggleFavorite,
+              onPressed: () async {
+                if (_meal != null) {
+                  await ref
+                      .read(favoriteMealsProvider.notifier)
+                      .toggleFavorite(_meal!);
+                }
+              },
             ),
         ],
       ),
@@ -105,26 +129,34 @@ class _RecipePageState extends State<RecipePage> {
     );
   }
 
-  /// Builds the body of the page.
-  ///
-  /// This method returns different widgets based on the current state:
-  /// - A loading indicator if the data is being fetched.
-  /// - An error view if an error occurred during the fetch.
-  /// - A message indicating no meal details are available if the meal is null.
-  /// - The meal details if the meal is successfully fetched.
   Widget _buildBody() {
     if (_isLoading) {
       return const LoadingView();
     }
 
     if (_error != null) {
-      return ErrorView(onRetry: _loadMealDetails, errString: _error!);
+      return ErrorView(
+        onRetry: _loadMealDetails,
+        errString: _error!,
+      );
     }
 
     if (_meal == null) {
-      return const Center(child: Text(TextConstants.noMealDetailsError));
+      return const Center(
+        child: Text(TextConstants.noMealDetailsError),
+      );
     }
 
+    /// Builds a scrollable view containing the recipe details.
+    ///
+    /// The view includes the following sections:
+    /// - A header with the meal image and ingredients.
+    /// - Instructions for preparing the meal.
+    /// - Metadata about the meal such as category and area.
+    ///
+    /// The layout is padded and spaced using constants from `UIConstants`.
+    ///
+    /// Returns a `SingleChildScrollView` widget containing the recipe details.
     return SingleChildScrollView(
       padding: const EdgeInsets.all(UIConstants.doublePadding),
       child: Column(
