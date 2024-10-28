@@ -36,7 +36,7 @@ flutter run
 ## 🛠️ Technologies Used
 
 - **Flutter**: Because I need a Flutter job
-- **SQLite with FFI**: For local storage of favorited recipes
+- **SQLite with FFI**: For local storage of favorited recipes because ✨Offline First✨
 - **TheMealDB API**: Backend for all the data
 - **connectivity_plus**: To remind you that you need internet to browse online content
 - **http**: For fetching data
@@ -57,6 +57,7 @@ flutter run
 
 ```
 lib/
+├── constants/      # Text and UI values
 ├── models/         # Data models (Category, Meal)
 ├── screens/        # UI screens
 ├── services/       # Business logic and API calls
