@@ -75,6 +75,7 @@ lib/
 ## 🐛 Known Issues
 - When you make a search by name, maximum of 25 results gets listed(API limitation). 
 - May cause unexpected hunger
+- This project doesn't benefit from any state managament solution other than good old setState method becase the company I've made this for wanted me to do so
 
 ## ⭕ Random notes
 - I've made MANY versions of this, from a quickly built trash to over-engineered masterpieces... But then decided to submit this. Why? Idk.
