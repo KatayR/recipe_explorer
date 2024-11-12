@@ -116,7 +116,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     return MealGrid(
       meals: mealsData,
       onMealSelected: _onMealSelected,
-      // No need for pagination here as favorites are usually fewer
+      useCachedImages: true, // Enable cached images for favorites
     );
   }
 }

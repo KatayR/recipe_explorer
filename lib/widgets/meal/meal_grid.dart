@@ -9,8 +9,8 @@ class MealGrid extends StatelessWidget {
   final Function(Meal) onMealSelected;
   final ScrollController? scrollController;
   final bool isLoading;
-  // Flag to indicate if there are more items to load
-  final bool hasMore;
+  final bool hasMore; // Flag to indicate if there are more items to load
+  final bool useCachedImages; // Parameter to control image caching
 
   const MealGrid({
     super.key,
@@ -19,6 +19,7 @@ class MealGrid extends StatelessWidget {
     this.scrollController,
     this.isLoading = false,
     this.hasMore = false,
+    this.useCachedImages = false, // Default to false
   });
 
   @override
@@ -47,6 +48,7 @@ class MealGrid extends StatelessWidget {
           meal: meals[index],
           // Call the onMealSelected callback when a meal is tapped
           onTap: () => onMealSelected(Meal.fromJson(meals[index])),
+          useCachedImage: useCachedImages,
         );
       },
     );
