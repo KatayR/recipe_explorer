@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'meal_image.dart';
 
 class MealCard extends StatelessWidget {
   final dynamic meal;
   final VoidCallback onTap;
+  final bool useCachedImage;
 
   const MealCard({
     super.key,
     required this.meal,
     required this.onTap,
+    this.useCachedImage = false, // Default to false
   });
 
   @override
@@ -21,11 +24,18 @@ class MealCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Image.network(
-                meal['strMealThumb'],
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
+              child: useCachedImage
+                  ? MealImage(
+                      mealId: meal['idMeal'],
+                      imageUrl: meal['strMealThumb'],
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.network(
+                      meal['strMealThumb'],
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
             ),
             Padding(
               padding: const EdgeInsets.all(8),
