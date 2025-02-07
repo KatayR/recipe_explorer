@@ -9,6 +9,7 @@ So, welcome to Recipe Explorer—the app that promises to make you a master chef
 ### Prerequisites
 - Flutter SDK 3.24.3 (latest stable version)
 - Dart SDK 3.5.3 (latest stable version)
+- Android Studio 2024.1.2 (latest ACTUALLY stable version)
 - Visual Studio 2022 (17.11.3)
 - A burning desire to look at food pictures
 
