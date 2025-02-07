@@ -3,6 +3,8 @@
 Because apparently, we all need just another recipe app in our lives. But hey, at least this one's built with Flutter!
 
 So, welcome to Recipe Explorer—the app that promises to make you a master chef. Or, at the very least, to help you understand what you *could* be making instead of instant noodles.
+# Video
+[![IMAGE ALT TEXT](https://i.ytimg.com/vi/EypNIrGtDnI/hqdefault.jpg)](https://youtu.be/EypNIrGtDnI "Recipe Explorer Demo")
 
 ## 🚀 Getting Started
 
