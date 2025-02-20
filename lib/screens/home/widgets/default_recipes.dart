@@ -29,9 +29,10 @@ import 'package:recipe_explorer/widgets/error/error_view.dart';
 import '../../../services/api_service.dart';
 import '../../../widgets/loading/loading_view.dart';
 import '../../../widgets/meal/meal_grid.dart';
+import '../../../widgets/scroll/scrollable_wrapper.dart';
 import '../../recipe/recipe_page.dart';
 
-class DefaultRecipesSection extends StatelessWidget {
+class DefaultRecipesSection extends StatefulWidget {
   final ApiService apiService;
 
   const DefaultRecipesSection({
@@ -40,38 +41,63 @@ class DefaultRecipesSection extends StatelessWidget {
   });
 
   @override
+  State<DefaultRecipesSection> createState() => _DefaultRecipesSectionState();
+}
+
+class _DefaultRecipesSectionState extends State<DefaultRecipesSection> {
+  ScrollController? _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Get the primary scroll controller which is set by NestedScrollView
+    _scrollController = PrimaryScrollController.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
           padding: EdgeInsets.all(UIConstants.defaultPadding),
-          child: Text(TextConstants.defaultCategoryTitle,
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text(
+            TextConstants.defaultCategoryTitle,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
         Expanded(
           child: FutureBuilder<ApiResponse<List<dynamic>>>(
-            future: apiService.getMealsByCategory('Chicken'),
+            future: widget.apiService.getMealsByCategory('Chicken'),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const LoadingView();
               }
+
               if (snapshot.hasError || (snapshot.data?.error != null)) {
                 return const ErrorView(
                   errString: TextConstants.defaultCategoryError,
                 );
               }
+
               final meals = snapshot.data?.data ?? [];
-              return MealGrid(
-                meals: meals,
-                onMealSelected: (meal) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecipePage(
-                      mealId: meal.idMeal,
-                      mealName: meal.strMeal,
+
+              return ScrollableWrapper(
+                controller: _scrollController,
+                useScaffold: false,
+                child: MealGrid(
+                  meals: meals,
+                  onMealSelected: (meal) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RecipePage(
+                        mealId: meal.idMeal,
+                        mealName: meal.strMeal,
+                      ),
                     ),
                   ),
+                  scrollController: _scrollController,
                 ),
               );
             },
