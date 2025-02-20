@@ -22,6 +22,7 @@ import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../../services/favorites_service.dart';
 import '../../models/meal_model.dart';
 import '../../widgets/meal/meal_grid.dart';
+import '../../widgets/scroll/scrollable_wrapper.dart';
 import '../recipe/recipe_page.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -33,6 +34,7 @@ class FavoritesPage extends StatefulWidget {
 
 class _FavoritesPageState extends State<FavoritesPage> {
   final FavoritesService _favoritesService = FavoritesService();
+  final ScrollController _scrollController = ScrollController();
   List<Meal> _favoriteMeals = [];
   bool _isLoading = true;
 
@@ -42,11 +44,15 @@ class _FavoritesPageState extends State<FavoritesPage> {
     _loadFavorites();
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadFavorites() async {
     setState(() => _isLoading = true);
-
     final meals = await _favoritesService.getFavorites();
-
     setState(() {
       _favoriteMeals = meals;
       _isLoading = false;
@@ -62,20 +68,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
           mealName: meal.strMeal,
         ),
       ),
-    ).then((_) => _loadFavorites()); // Refresh list when returning
+    ).then((_) => _loadFavorites()); // Refreshing list when returning
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(TextConstants.favoritesTitle),
-      ),
-      body: _buildBody(),
-    );
-  }
-
-  Widget _buildBody() {
+  Widget _buildContent() {
     if (_isLoading) {
       return const LoadingView();
     }
@@ -110,13 +106,22 @@ class _FavoritesPageState extends State<FavoritesPage> {
       );
     }
 
-    // Convert Meal objects to map format expected by MealGrid
     final mealsData = _favoriteMeals.map((meal) => meal.toJson()).toList();
 
     return MealGrid(
       meals: mealsData,
       onMealSelected: _onMealSelected,
-      useCachedImages: true, // Enable cached images for favorites
+      scrollController: _scrollController,
+      useCachedImages: true,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScrollableWrapper(
+      controller: _scrollController,
+      title: TextConstants.favoritesTitle,
+      child: _buildContent(),
     );
   }
 }
