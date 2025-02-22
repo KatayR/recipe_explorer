@@ -38,6 +38,7 @@ class TextConstants {
   static const String tryAgainButton = 'Try Again';
   static const String closeButton = 'Close';
   static const String addToFavoritesButton = '💕';
+  static const String favoritesTooltip = 'Favorites';
 
   // Miscellaneous
 
