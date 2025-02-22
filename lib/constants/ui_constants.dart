@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class UIConstants {
   // Grid configuration
   static const double mobileMaxWidth = 600;
@@ -27,4 +29,7 @@ class UIConstants {
   static const double bodyFontSize = 14.0;
   static const double categoryTextSize = 14.0;
   static const double categoryTextSizeMobile = 12.0;
+
+  // Misc
+  static BorderRadius circularBorderRadious = BorderRadius.circular(14);
 }
