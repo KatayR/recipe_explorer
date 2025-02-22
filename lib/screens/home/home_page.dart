@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_explorer/screens/home/widgets/favorites_button.dart';
 import 'package:recipe_explorer/widgets/connectivity/connected_wrapper.dart';
 import '../../../services/api_service.dart';
 import '../../constants/text_constants.dart';
@@ -80,7 +81,14 @@ class _HomePageState extends State<HomePage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: UIConstants.defaultPadding),
-                      child: CustomSearchBar(onSearch: _searchMeals),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          CustomSearchBar(onSearch: _searchMeals),
+                          const SizedBox(width: 8),
+                          const FavoritesButton(),
+                        ],
+                      ),
                     ),
                     CategoriesSection(
                       onCategorySelected: _onCategorySelected,
