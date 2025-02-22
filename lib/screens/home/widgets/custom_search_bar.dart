@@ -28,10 +28,10 @@
 /// The [_showFilterDialog] method displays a dialog with checkboxes for selecting the search criteria.
 ///
 /// The text field input is managed by a [TextEditingController], which is disposed of in the [dispose] method.
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
 import '../../../constants/text_constants.dart';
-import '../../favorites/favorites_page.dart';
+import '../../../constants/ui_constants.dart';
 
 class CustomSearchBar extends StatefulWidget {
   final Function(String, {bool byName, bool byIngredient}) onSearch;
@@ -125,11 +125,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           Expanded(
             child: Material(
               elevation: 2,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: UIConstants.circularBorderRadious,
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: UIConstants.circularBorderRadious,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
@@ -157,27 +157,6 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             ),
           ),
           const SizedBox(width: 8),
-
-          // Favorites Button with Elevation
-          Tooltip(
-            message: "Favorites",
-            child: Material(
-              color: Colors.red.shade50,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              elevation: 2,
-              child: IconButton(
-                icon: const Icon(Icons.favorite, color: Colors.red),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FavoritesPage(),
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
