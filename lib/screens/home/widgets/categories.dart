@@ -280,8 +280,9 @@ class _ScrollArrow extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 16,
+          width: 26,
           decoration: BoxDecoration(
+            shape: BoxShape.circle,
             gradient: LinearGradient(
               begin: direction != -1
                   ? Alignment.centerRight
@@ -299,7 +300,7 @@ class _ScrollArrow extends StatelessWidget {
             child: Icon(
               direction == -1 ? Icons.chevron_left : Icons.chevron_right,
               color: Colors.white,
-              size: 24,
+              size: 26,
             ),
           ),
         ),
