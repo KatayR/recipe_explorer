@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> {
           ),
           child: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
-              const HomeAppBar(),
+              // const HomeAppBar(),
               SliverToBoxAdapter(
                 child: Column(
                   children: [
