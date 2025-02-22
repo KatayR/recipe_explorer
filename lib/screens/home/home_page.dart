@@ -78,7 +78,8 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(UIConstants.defaultPadding),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: UIConstants.defaultPadding),
                       child: CustomSearchBar(onSearch: _searchMeals),
                     ),
                     CategoriesSection(
