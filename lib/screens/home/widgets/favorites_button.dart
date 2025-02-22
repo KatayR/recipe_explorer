@@ -4,11 +4,8 @@ import '../../../constants/ui_constants.dart';
 import '../../favorites/favorites_page.dart';
 
 class FavoritesButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
   const FavoritesButton({
     super.key,
-    required this.onPressed,
   });
 
   @override
