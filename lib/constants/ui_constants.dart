@@ -32,4 +32,5 @@ class UIConstants {
 
   // Misc
   static BorderRadius circularBorderRadious = BorderRadius.circular(14);
+  static const double offlineAppBarHeight = 64.4;
 }

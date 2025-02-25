@@ -118,38 +118,34 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Material(
-          elevation: 2,
-          borderRadius: UIConstants.circularBorderRadious,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: UIConstants.circularBorderRadious,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: const InputDecoration(
-                      hintText: TextConstants.searchHint,
-                      prefixIcon: Icon(Icons.search),
-                      border: InputBorder.none,
-                    ),
-                    onSubmitted: (_) => _handleSearch(),
+      child: Material(
+        elevation: 2,
+        borderRadius: UIConstants.circularBorderRadious,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: UIConstants.circularBorderRadious,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  decoration: const InputDecoration(
+                    hintText: TextConstants.searchHint,
+                    prefixIcon: Icon(Icons.search),
+                    border: InputBorder.none,
                   ),
+                  onSubmitted: (_) => _handleSearch(),
                 ),
+              ),
 
-                // Filter Icon Button
-                IconButton(
-                  icon: const Icon(Icons.tune),
-                  onPressed: () => _showFilterDialog(context),
-                ),
-              ],
-            ),
+              // Filter Icon Button
+              IconButton(
+                icon: const Icon(Icons.tune),
+                onPressed: () => _showFilterDialog(context),
+              ),
+            ],
           ),
         ),
       ),
