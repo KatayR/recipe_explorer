@@ -4,7 +4,7 @@ Because apparently, we all need just another recipe app in our lives. But hey, a
 
 So, welcome to Recipe Explorer—the app that promises to make you a master chef.
 # Video
-[![IMAGE ALT TEXT](https://i.ytimg.com/vi/EypNIrGtDnI/hqdefault.jpg)](https://youtu.be/EypNIrGtDnI "Recipe Explorer Demo")
+[![IMAGE ALT TEXT](https://i.ytimg.com/vi/NuWcoQqPGF4/hqdefault.jpg)](https://youtu.be/NuWcoQqPGF4 "Recipe Explorer Demo")
 
 ## 🚀 Getting Started
 
