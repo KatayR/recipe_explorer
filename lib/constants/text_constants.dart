@@ -6,6 +6,7 @@ class TextConstants {
   static const String searchResultsTitle = 'Search Results';
   static const String categoryResultsTitle = 'Category';
   static const String genericResultsTitle = 'Results';
+  static const String offlineFavoritesHint = 'Favorites ►';
 
   // Search related
   static const String searchHint = 'Search recipes...';
