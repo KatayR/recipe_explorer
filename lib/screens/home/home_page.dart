@@ -5,7 +5,7 @@ import '../../../services/api_service.dart';
 import '../../constants/text_constants.dart';
 import '../../constants/ui_constants.dart';
 import '../../widgets/error/error_view.dart';
-import 'widgets/app_bar.dart';
+import 'widgets/offline_app_bar.dart';
 import 'widgets/categories.dart';
 import 'widgets/custom_search_bar.dart';
 import 'widgets/default_recipes.dart';
@@ -59,21 +59,10 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: SafeArea(
         child: ConnectivityWrapper(
-          errorBuilder: (retryCallback) => CustomScrollView(
-            slivers: [
-              const SliverAppBar(
-                floating: true,
-                snap: true,
-                title: Text(TextConstants.offlineFavoritesHint),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: UIConstants.defaultPadding),
-                    child: FavoritesButton(),
-                  ),
-                ],
-              ),
-              SliverFillRemaining(
+          errorBuilder: (retryCallback) => Column(
+            children: [
+              const OfflineAppBar(),
+              Expanded(
                 child: Center(
                   child: ErrorView(
                     errString: TextConstants.loadError,
@@ -90,14 +79,14 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: UIConstants.defaultPadding),
+                      padding: const EdgeInsets.all(UIConstants.defaultPadding),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           CustomSearchBar(onSearch: _searchMeals),
                           const SizedBox(width: 8),
-                          const FavoritesButton(),
+                          // Match the same padding structure used in offline state
+                          FavoritesButton(),
                         ],
                       ),
                     ),
