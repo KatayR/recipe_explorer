@@ -61,7 +61,18 @@ class _HomePageState extends State<HomePage> {
         child: ConnectivityWrapper(
           errorBuilder: (retryCallback) => CustomScrollView(
             slivers: [
-              const HomeAppBar(),
+              const SliverAppBar(
+                floating: true,
+                snap: true,
+                title: Text(TextConstants.offlineFavoritesHint),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: UIConstants.defaultPadding),
+                    child: FavoritesButton(),
+                  ),
+                ],
+              ),
               SliverFillRemaining(
                 child: Center(
                   child: ErrorView(
