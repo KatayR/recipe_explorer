@@ -3,6 +3,9 @@
 Because apparently, we all need just another recipe app in our lives. But hey, at least this one's built with Flutter!
 
 So, welcome to Recipe Explorer—the app that promises to make you a master chef.
+
+[Download](https://github.com/KatayR/recipe_explorer/releases/download/v2/app-release.apk)
+
 # Video
 [![IMAGE ALT TEXT](https://i.ytimg.com/vi/NuWcoQqPGF4/hqdefault.jpg)](https://youtu.be/NuWcoQqPGF4 "Recipe Explorer Demo")
 
