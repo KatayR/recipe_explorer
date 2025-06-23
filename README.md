@@ -42,6 +42,7 @@ flutter run
 ## 🛠️ Technologies Used
 
 - **Flutter**: Because I need a Flutter job
+- **GetX**: Modern reactive state management and dependency injection
 - **SQLite with FFI**: For local storage of favorited recipes because ✨Offline First✨
 - **TheMealDB API**: Backend for all the data
 - **connectivity_plus**: To remind you that you need internet to browse online content
@@ -57,7 +58,9 @@ flutter run
 - Save favorite recipes locally
 - Responsive design (works on mobile, tablet, and desktop)
 - Offline support for favorite recipes
-- Image caching
+- Image caching and preloading
+- Reactive UI with GetX state management
+- Named route navigation
 
 ## 🏗️ Project Structure
 
@@ -65,8 +68,9 @@ flutter run
 lib/
 ├── constants/      # Text and UI values
 ├── models/         # Data models (Category, Meal)
-├── screens/        # UI screens
-├── services/       # Business logic and API calls
+├── routes/         # GetX navigation routes and pages
+├── screens/        # UI screens with GetView architecture
+├── services/       # GetX controllers and services
 ├── utils/          # Utility functions
 └── widgets/        # Reusable UI components
 ```
@@ -76,11 +80,17 @@ lib/
 - The app uses a responsive design pattern, so it looks good on everything from your phone to your smart fridge
 - Images are cached locally to save your data (and API provider's bandwidth)
 - SQLite with FFI support means the app works smoothly on desktop platforms
+- Built with GetX architecture for reactive state management and clean code structure
+- Uses dependency injection for better testability and maintainability
 
 ## 🐛 Known Issues
 - When you make a search by name, maximum of 25 results gets listed(API limitation). 
 - May cause unexpected hunger
-- This project doesn't benefit from any state managament solution other than good old setState method becase the company I've made this for wanted me to do so
+
+## 🔄 Architecture Evolution
+- **Previously**: Used traditional Flutter setState() for state management per client requirements
+- **Current**: Migrated to GetX architecture for improved reactivity and maintainability
+- **Migration**: Completed systematic 12-step conversion while maintaining all existing functionality
 
 ## ⭕ Random notes
 - If user doesn't select a filter OR explicitly unchecks both filters in the filter dialog, app will search for recipes by their names, which is probably the most intuitive default behavior for users.
