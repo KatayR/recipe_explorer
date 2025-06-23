@@ -20,7 +20,7 @@ import 'package:recipe_explorer/constants/text_constants.dart';
 import 'package:recipe_explorer/constants/ui_constants.dart';
 import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../../services/favorites_service.dart';
-import '../../../services/image_preloader.dart';
+import '../../../services/scroll_preloader.dart';
 import '../../models/meal_model.dart';
 import '../../widgets/meal/meal_grid.dart';
 import '../../widgets/scroll/scrollable_wrapper.dart';
@@ -36,10 +36,9 @@ class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage> {
   final FavoritesService _favoritesService = FavoritesService();
   final ScrollController _scrollController = ScrollController();
-  final ImagePreloaderService _imagePreloader = ImagePreloaderService();
+  ScrollPreloader? _scrollPreloader;
   List<Meal> _favoriteMeals = [];
   bool _isLoading = true;
-  bool _imagesPreloaded = false;
 
   @override
   void initState() {
@@ -49,6 +48,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   @override
   void dispose() {
+    _scrollPreloader?.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -61,36 +61,29 @@ class _FavoritesPageState extends State<FavoritesPage> {
       _isLoading = false;
     });
     
-    // Preload images after favorites are loaded
+    // Initialize preloading after favorites are loaded
     if (_favoriteMeals.isNotEmpty) {
-      _preloadImages();
+      await _initializePreloading();
     }
   }
 
-  void _preloadImages() async {
-    if (_favoriteMeals.isNotEmpty && !_imagesPreloaded && mounted) {
-      // Use standard preload count for consistency
-      final imagesToPreload = _favoriteMeals
-          .take(ImagePreloaderService.standardPreloadCount)
-          .map((meal) => meal.strMealThumb)
-          .where((url) => url.isNotEmpty)
-          .toList();
-      
-      debugPrint('Favorites: Found ${imagesToPreload.length}/${_favoriteMeals.length} images to preload');
-      
-      if (imagesToPreload.isNotEmpty && mounted) {
-        debugPrint('Favorites: Starting image preloading...');
-        await _imagePreloader.preloadNetworkImages(imagesToPreload, context);
-        debugPrint('Favorites: Image preloading completed');
-        
-        if (mounted) {
-          setState(() {
-            _imagesPreloaded = true;
-          });
-          debugPrint('Favorites: Initial preload completed - ${imagesToPreload.length} images cached');
-        }
-      }
-    }
+  Future<void> _initializePreloading() async {
+    if (_favoriteMeals.isEmpty) return;
+
+    // Extract image URLs from favorite meals
+    final imageUrls = _favoriteMeals
+        .map((meal) => meal.strMealThumb)
+        .where((url) => url.isNotEmpty)
+        .toList();
+
+    // Initialize scroll preloader service
+    _scrollPreloader = ScrollPreloader(imageUrls: imageUrls);
+    await _scrollPreloader!.initialize(context);
+
+    // Set up scroll listener to delegate to the service
+    _scrollController.addListener(() {
+      _scrollPreloader!.onScroll(_scrollController);
+    });
   }
 
   void _onMealSelected(Meal meal) {
