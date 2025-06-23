@@ -34,6 +34,7 @@
 /// );
 /// ```
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:recipe_explorer/constants/text_constants.dart';
 import '../../../services/api_service.dart';
 import '../../../services/scroll_preloader.dart';
@@ -44,7 +45,72 @@ import '../../widgets/meal/meal_grid.dart';
 import '../../widgets/scroll/scrollable_wrapper.dart';
 import '../recipe/recipe_page.dart';
 
-class ResultsPage extends StatefulWidget {
+class ResultsPageController extends GetxController {
+  final ApiController _apiController = Get.find<ApiController>();
+
+  var meals = <dynamic>[].obs;
+  var isLoading = true.obs;
+  var error = Rx<String?>(null);
+
+  String? get searchQuery => _searchQuery;
+  String? get categoryName => _categoryName;
+  bool get searchByName => _searchByName;
+  bool get searchByIngredient => _searchByIngredient;
+
+  String? _searchQuery;
+  String? _categoryName;
+  bool _searchByName = true;
+  bool _searchByIngredient = false;
+
+  void initialize({
+    String? searchQuery,
+    String? categoryName,
+    bool searchByName = true,
+    bool searchByIngredient = false,
+  }) {
+    _searchQuery = searchQuery;
+    _categoryName = categoryName;
+    _searchByName = searchByName;
+    _searchByIngredient = searchByIngredient;
+    loadResults();
+  }
+
+  Future<void> loadResults() async {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      final response = searchQuery != null
+          ? await _apiController.searchMeals(
+              query: searchQuery!,
+              searchByName: searchByName,
+              searchByIngredient: searchByIngredient,
+            )
+          : await _apiController.getMealsByCategory(categoryName!);
+
+      isLoading.value = false;
+      if (response.error != null) {
+        error.value = TextConstants.loadError;
+      } else {
+        meals.value = response.data ?? [];
+      }
+    } catch (e) {
+      isLoading.value = false;
+      error.value = TextConstants.loadError;
+    }
+  }
+
+  String getPageTitle() {
+    if (searchQuery != null) {
+      return '${TextConstants.searchResultsTitle}: $searchQuery';
+    } else if (categoryName != null) {
+      return '${TextConstants.categoryResultsTitle}: $categoryName';
+    }
+    return TextConstants.genericResultsTitle;
+  }
+}
+
+class ResultsPage extends GetView<ResultsPageController> {
   final String? searchQuery;
   final String? categoryName;
   final bool searchByName;
@@ -59,138 +125,90 @@ class ResultsPage extends StatefulWidget {
   });
 
   @override
-  State<ResultsPage> createState() => _ResultsPageState();
-}
-
-class _ResultsPageState extends State<ResultsPage> {
-  final ApiService _apiService = ApiService();
-  final ScrollController _scrollController = ScrollController();
-  ScrollPreloader? _scrollPreloader;
-  List<dynamic> _meals = [];
-  bool _isLoading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadResults();
-  }
-
-  @override
-  void dispose() {
-    _scrollPreloader?.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-
-  Future<void> _loadResults() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final response = widget.searchQuery != null
-          ? await _apiService.searchMeals(
-              query: widget.searchQuery!,
-              searchByName: widget.searchByName,
-              searchByIngredient: widget.searchByIngredient,
-            )
-          : await _apiService.getMealsByCategory(widget.categoryName!);
-
-      setState(() {
-        _isLoading = false;
-        if (response.error != null) {
-          _error = TextConstants.loadError;
-        } else {
-          _meals = response.data ?? [];
-        }
-      });
-      
-      // Initialize preloading after meals are loaded
-      if (_meals.isNotEmpty) {
-        await _initializePreloading();
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _error = TextConstants.loadError;
-      });
-    }
-  }
-
-  Future<void> _initializePreloading() async {
-    if (_meals.isEmpty) return;
-
-    // Extract image URLs from meals data
-    final imageUrls = _meals
-        .map((meal) => meal['strMealThumb'] as String)
-        .where((url) => url.isNotEmpty)
-        .toList();
-
-    // Initialize scroll preloader service
-    _scrollPreloader = ScrollPreloader(imageUrls: imageUrls);
-    await _scrollPreloader!.initialize(context);
-
-    // Set up scroll listener to delegate to the service
-    _scrollController.addListener(() {
-      _scrollPreloader!.onScroll(_scrollController);
-    });
-  }
-
-  void _navigateToRecipe(Meal meal) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RecipePage(
-          mealId: meal.idMeal,
-          mealName: meal.strMeal,
-        ),
-      ),
-    );
-  }
-
-  String _getPageTitle() {
-    if (widget.searchQuery != null) {
-      return '${TextConstants.searchResultsTitle}: ${widget.searchQuery}';
-    } else if (widget.categoryName != null) {
-      return '${TextConstants.categoryResultsTitle}: ${widget.categoryName}';
-    }
-    return TextConstants.genericResultsTitle;
-  }
-
-  Widget _buildContent() {
-    if (_isLoading) {
-      return const LoadingView();
-    }
-
-    if (_error != null) {
-      return ErrorView(
-        onRetry: _loadResults,
-        errString: _error!,
-      );
-    }
-
-    if (_meals.isEmpty) {
-      return const ErrorView(
-        errString: TextConstants.noResultsError,
-      );
-    }
-
-    return MealGrid(
-      meals: _meals,
-      onMealSelected: _navigateToRecipe,
-      scrollController: _scrollController,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final ScrollController scrollController = ScrollController();
+    ScrollPreloader? scrollPreloader;
+
+    // Create a unique tag for this instance
+    final tag = '${searchQuery ?? categoryName ?? 'results'}_${DateTime.now().millisecondsSinceEpoch}';
+    
+    // Initialize controller with search parameters
+    Get.put(ResultsPageController(), tag: tag);
+    final controller = Get.find<ResultsPageController>(tag: tag);
+    controller.initialize(
+      searchQuery: searchQuery,
+      categoryName: categoryName,
+      searchByName: searchByName,
+      searchByIngredient: searchByIngredient,
+    );
+
+    void initializePreloading() async {
+      if (controller.meals.isEmpty) return;
+
+      // Extract image URLs from meals data
+      final imageUrls = controller.meals
+          .map((meal) => meal['strMealThumb'] as String)
+          .where((url) => url.isNotEmpty)
+          .toList();
+
+      // Initialize scroll preloader service
+      scrollPreloader = ScrollPreloader(imageUrls: imageUrls);
+      await scrollPreloader!.initialize(context);
+
+      // Set up scroll listener to delegate to the service
+      scrollController.addListener(() {
+        scrollPreloader!.onScroll(scrollController);
+      });
+    }
+
+    void navigateToRecipe(Meal meal) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RecipePage(
+            mealId: meal.idMeal,
+            mealName: meal.strMeal,
+          ),
+        ),
+      );
+    }
+
+    Widget buildContent() {
+      return Obx(() {
+        if (controller.isLoading.value) {
+          return const LoadingView();
+        }
+
+        if (controller.error.value != null) {
+          return ErrorView(
+            onRetry: controller.loadResults,
+            errString: controller.error.value!,
+          );
+        }
+
+        if (controller.meals.isEmpty) {
+          return const ErrorView(
+            errString: TextConstants.noResultsError,
+          );
+        }
+
+        // Initialize preloading when meals are available
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          initializePreloading();
+        });
+
+        return MealGrid(
+          meals: controller.meals,
+          onMealSelected: navigateToRecipe,
+          scrollController: scrollController,
+        );
+      });
+    }
+
     return ScrollableWrapper(
-      controller: _scrollController,
-      title: _getPageTitle(),
-      child: _buildContent(),
+      controller: scrollController,
+      title: controller.getPageTitle(),
+      child: buildContent(),
     );
   }
 }
