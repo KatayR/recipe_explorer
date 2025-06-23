@@ -22,19 +22,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:path/path.dart' as path_helper;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_common/sqlite_api.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import '../models/meal_model.dart';
 
-class StorageService {
-  static final StorageService instance = StorageService._init();
+class StorageService extends GetxService {
   static Database? _database;
   static bool _initialized = false;
-
-  StorageService._init();
 
   /// Initialize FFI
   static Future<void> initializeFfi() async {

@@ -12,6 +12,10 @@ void main() async {
 
   // Initialize the FFI database
   await StorageService.initializeFfi();
+  
+  // Initialize GetX services
+  Get.put(StorageService());
+  
   runApp(const RecipeExplorer());
 }
 

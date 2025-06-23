@@ -1,8 +1,9 @@
+import 'package:get/get.dart';
 import '../models/meal_model.dart';
 import 'storage_service.dart';
 
 class FavoritesService {
-  final StorageService _storage = StorageService.instance;
+  final StorageService _storage = Get.find<StorageService>();
 
   /// Get all favorite meals from storage
   Future<List<Meal>> getFavorites() async {
