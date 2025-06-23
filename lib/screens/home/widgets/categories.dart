@@ -9,13 +9,13 @@
 /// The [apiService] parameter can be used to provide a custom API service for fetching
 /// categories. If not provided, a default [ApiService] instance is used.
 ///
-/// The [CategoriesSection] widget is stateful and manages its own state, including
-/// loading, error, and category data.
+/// The [CategoriesSection] widget uses GetX reactive state management.
 ///
 
 // Yes, this is a rather large snippet, but it's all related to the same widget.
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:ui';
 import '../../../widgets/loading/loading_view.dart';
 import '../../../widgets/error/error_view.dart';
@@ -23,7 +23,45 @@ import '../../../services/api_service.dart';
 import '../../../models/category_model.dart';
 import '../../../utils/responsive_helper.dart';
 
-class CategoriesSection extends StatefulWidget {
+class CategoriesSectionController extends GetxController {
+  final ApiController _apiController = Get.find<ApiController>();
+
+  var categories = <Category>[].obs;
+  var isLoading = true.obs;
+  var error = Rx<String?>(null);
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadCategories();
+  }
+
+  /// Loads categories from the API service.
+  ///
+  /// This method fetches categories from the API service and updates the reactive state
+  /// accordingly. It handles loading and error states.
+  Future<void> loadCategories() async {
+    try {
+      isLoading.value = true;
+      error.value = null;
+
+      final response = await _apiController.getCategories();
+
+      isLoading.value = false;
+      if (response.error != null) {
+        error.value = response.error;
+      } else if (response.data != null) {
+        categories.value =
+            response.data!.map((json) => Category.fromJson(json)).toList();
+      }
+    } catch (e) {
+      isLoading.value = false;
+      error.value = 'Failed to load categories. Please check your connection.';
+    }
+  }
+}
+
+class CategoriesSection extends GetView<CategoriesSectionController> {
   /// Callback function triggered when a category is selected.
   final Function(String category) onCategorySelected;
 
@@ -36,88 +74,34 @@ class CategoriesSection extends StatefulWidget {
   });
 
   @override
-  State<CategoriesSection> createState() => _CategoriesSectionState();
-}
-
-class _CategoriesSectionState extends State<CategoriesSection> {
-  /// API service for fetching categories.
-  final ApiService _apiService;
-
-  /// List of categories fetched from the API.
-  List<Category> _categories = [];
-
-  /// Indicates whether the categories are currently being loaded.
-  bool _isLoading = true;
-
-  /// Error message, if any, encountered while loading categories.
-  String? _error;
-
-  /// Initializes the state of the [CategoriesSection] widget.
-  _CategoriesSectionState() : _apiService = ApiService();
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCategories();
-  }
-
-  /// Loads categories from the API service.
-  ///
-  /// This method fetches categories from the API service and updates the state
-  /// accordingly. It handles loading and error states.
-  Future<void> _loadCategories() async {
-    try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
-
-      final response = await _apiService.getCategories();
-
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          if (response.error != null) {
-            _error = response.error;
-          } else if (response.data != null) {
-            _categories =
-                response.data!.map((json) => Category.fromJson(json)).toList();
-          }
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _error = 'Failed to load categories. Please check your connection.';
-        });
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const SizedBox(
-        height: 120,
-        child: Center(child: LoadingView()),
-      );
-    }
+    // Initialize controller if not already done
+    Get.put(CategoriesSectionController(), tag: 'categories');
+    final controller = Get.find<CategoriesSectionController>(tag: 'categories');
 
-    if (_error != null) {
-      return SizedBox(
-        height: 120,
-        child: ErrorView(
-          errString: _error!,
-          onRetry: _loadCategories,
-        ),
-      );
-    }
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const SizedBox(
+          height: 120,
+          child: Center(child: LoadingView()),
+        );
+      }
 
-    return CategoryList(
-      categories: _categories,
-      onCategorySelected: widget.onCategorySelected,
-    );
+      if (controller.error.value != null) {
+        return SizedBox(
+          height: 120,
+          child: ErrorView(
+            errString: controller.error.value!,
+            onRetry: controller.loadCategories,
+          ),
+        );
+      }
+
+      return CategoryList(
+        categories: controller.categories,
+        onCategorySelected: onCategorySelected,
+      );
+    });
   }
 }
 
