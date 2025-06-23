@@ -3,7 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:recipe_explorer/constants/text_constants.dart';
-import 'screens/home/home_page.dart';
+import 'routes/app_pages.dart';
+import 'routes/app_routes.dart';
 import 'services/storage_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/image_cache.dart';
@@ -48,7 +49,8 @@ class RecipeExplorer extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const HomePage(),
+      initialRoute: AppRoutes.home,
+      getPages: AppPages.pages,
     );
   }
 }

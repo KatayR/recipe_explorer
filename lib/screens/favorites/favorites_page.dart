@@ -25,7 +25,7 @@ import '../../../services/scroll_preloader.dart';
 import '../../models/meal_model.dart';
 import '../../widgets/meal/meal_grid.dart';
 import '../../widgets/scroll/scrollable_wrapper.dart';
-import '../recipe/recipe_page.dart';
+import '../../routes/app_routes.dart';
 
 class FavoritesPage extends GetView<FavoritesController> {
   const FavoritesPage({super.key});
@@ -56,15 +56,13 @@ class FavoritesPage extends GetView<FavoritesController> {
     }
 
     void onMealSelected(Meal meal) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RecipePage(
-            mealId: meal.idMeal,
-            mealName: meal.strMeal,
-          ),
-        ),
-      ).then((_) => controller.loadFavorites()); // Refreshing list when returning
+      Get.toNamed(
+        AppRoutes.recipe,
+        arguments: {
+          AppRoutes.mealIdParam: meal.idMeal,
+          AppRoutes.mealNameParam: meal.strMeal,
+        },
+      )?.then((_) => controller.loadFavorites()); // Refreshing list when returning
     }
 
     Widget buildContent() {

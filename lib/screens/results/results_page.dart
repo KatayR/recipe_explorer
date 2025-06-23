@@ -43,7 +43,7 @@ import '../../widgets/error/error_view.dart';
 import '../../widgets/loading/loading_view.dart';
 import '../../widgets/meal/meal_grid.dart';
 import '../../widgets/scroll/scrollable_wrapper.dart';
-import '../recipe/recipe_page.dart';
+import '../../routes/app_routes.dart';
 
 class ResultsPageController extends GetxController {
   final ApiController _apiController = Get.find<ApiController>();
@@ -162,14 +162,12 @@ class ResultsPage extends GetView<ResultsPageController> {
     }
 
     void navigateToRecipe(Meal meal) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RecipePage(
-            mealId: meal.idMeal,
-            mealName: meal.strMeal,
-          ),
-        ),
+      Get.toNamed(
+        AppRoutes.recipe,
+        arguments: {
+          AppRoutes.mealIdParam: meal.idMeal,
+          AppRoutes.mealNameParam: meal.strMeal,
+        },
       );
     }
 

@@ -6,34 +6,31 @@ import '../../../services/api_service.dart';
 import '../../constants/text_constants.dart';
 import '../../constants/ui_constants.dart';
 import '../../widgets/error/error_view.dart';
+import '../../routes/app_routes.dart';
 import 'widgets/offline_app_bar.dart';
 import 'widgets/categories.dart';
 import 'widgets/custom_search_bar.dart';
 import 'widgets/default_recipes.dart';
-import '../results/results_page.dart';
 
 class HomePageController extends GetxController {
-  void onCategorySelected(String category, BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultsPage(categoryName: category),
-      ),
+  void onCategorySelected(String category) {
+    Get.toNamed(
+      AppRoutes.results,
+      arguments: {
+        AppRoutes.categoryNameParam: category,
+      },
     );
   }
 
-  void searchMeals(String query, BuildContext context,
-      {bool byName = true, bool byIngredient = false}) {
+  void searchMeals(String query, {bool byName = true, bool byIngredient = false}) {
     if (query.trim().isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResultsPage(
-            searchQuery: query,
-            searchByName: byName,
-            searchByIngredient: byIngredient,
-          ),
-        ),
+      Get.toNamed(
+        AppRoutes.results,
+        arguments: {
+          AppRoutes.searchQueryParam: query,
+          AppRoutes.searchByNameParam: byName,
+          AppRoutes.searchByIngredientParam: byIngredient,
+        },
       );
     }
   }
@@ -75,7 +72,7 @@ class HomePage extends GetView<HomePageController> {
                         children: [
                           CustomSearchBar(
                             onSearch: (query, {bool byName = true, bool byIngredient = false}) =>
-                                controller.searchMeals(query, context,
+                                controller.searchMeals(query,
                                     byName: byName, byIngredient: byIngredient),
                           ),
                           const SizedBox(width: 8),
@@ -84,8 +81,7 @@ class HomePage extends GetView<HomePageController> {
                       ),
                     ),
                     CategoriesSection(
-                      onCategorySelected: (category) =>
-                          controller.onCategorySelected(category, context),
+                      onCategorySelected: controller.onCategorySelected,
                     ),
                     const Divider(),
                   ],

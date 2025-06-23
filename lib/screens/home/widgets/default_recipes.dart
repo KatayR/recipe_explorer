@@ -30,7 +30,7 @@ import '../../../services/scroll_preloader.dart';
 import '../../../widgets/loading/loading_view.dart';
 import '../../../widgets/meal/meal_grid.dart';
 import '../../../widgets/scroll/scrollable_wrapper.dart';
-import '../../recipe/recipe_page.dart';
+import '../../../routes/app_routes.dart';
 
 class DefaultRecipesSectionController extends GetxController {
   final ApiController _apiController = Get.find<ApiController>();
@@ -122,14 +122,12 @@ class DefaultRecipesSection extends GetView<DefaultRecipesSectionController> {
               useScaffold: false,
               child: MealGrid(
                 meals: controller.meals,
-                onMealSelected: (meal) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecipePage(
-                      mealId: meal.idMeal,
-                      mealName: meal.strMeal,
-                    ),
-                  ),
+                onMealSelected: (meal) => Get.toNamed(
+                  AppRoutes.recipe,
+                  arguments: {
+                    AppRoutes.mealIdParam: meal.idMeal,
+                    AppRoutes.mealNameParam: meal.strMeal,
+                  },
                 ),
                 scrollController: scrollController,
               ),
