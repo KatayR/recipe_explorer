@@ -8,6 +8,7 @@ import 'services/storage_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/image_cache.dart';
 import 'services/image_preloader.dart';
+import 'services/api_service.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized before using platform channels
@@ -21,6 +22,7 @@ void main() async {
   Get.put(ConnectivityService());
   Get.put(ImageCacheService());
   Get.put(ImagePreloaderService());
+  Get.put(ApiController());
   
   runApp(const RecipeExplorer());
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:recipe_explorer/constants/service_constants.dart';
 
@@ -10,7 +11,10 @@ class ApiResponse<T> {
   ApiResponse({this.data, this.error});
 }
 
-class ApiService {
+class ApiController extends GetxController {
+  // Reactive state variables
+  var isLoading = false.obs;
+  var error = Rx<String?>(null);
   // Base URL for the API
   static const String baseUrl = ApiConstants.baseUrl;
   static const String categoriesEndpoint = ApiConstants.categoriesEndpoint;
@@ -24,15 +28,24 @@ class ApiService {
   /// Returns a list of category data or error message
   Future<ApiResponse<List<dynamic>>> getCategories() async {
     try {
+      isLoading.value = true;
+      error.value = null;
+      
       final response =
           await http.get(Uri.parse('$baseUrl/$categoriesEndpoint'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return ApiResponse(data: data['categories']);
       }
-      return ApiResponse(error: 'Failed to load categories');
+      const errorMsg = 'Failed to load categories';
+      error.value = errorMsg;
+      return ApiResponse(error: errorMsg);
     } catch (e) {
-      return ApiResponse(error: 'Network error: $e');
+      final errorMsg = 'Network error: $e';
+      error.value = errorMsg;
+      return ApiResponse(error: errorMsg);
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -123,4 +136,19 @@ class ApiService {
       return ApiResponse(error: 'Search failed: $e');
     }
   }
+}
+
+// Backward compatibility - keep old ApiService for gradual migration
+class ApiService {
+  final ApiController _controller = Get.find<ApiController>();
+  
+  Future<ApiResponse<List<dynamic>>> getCategories() => _controller.getCategories();
+  Future<ApiResponse<List<dynamic>>> searchMealsByName(String query) => _controller.searchMealsByName(query);
+  Future<ApiResponse<List<dynamic>>> searchMealsByIngredient(String ingredient) => _controller.searchMealsByIngredient(ingredient);
+  Future<ApiResponse<List<dynamic>>> getMealsByCategory(String category) => _controller.getMealsByCategory(category);
+  Future<ApiResponse<List<dynamic>>> searchMeals({
+    required String query,
+    bool searchByName = true,
+    bool searchByIngredient = false,
+  }) => _controller.searchMeals(query: query, searchByName: searchByName, searchByIngredient: searchByIngredient);
 }
