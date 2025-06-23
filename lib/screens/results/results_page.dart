@@ -39,6 +39,7 @@ import 'package:recipe_explorer/constants/text_constants.dart';
 import '../../../services/api_service.dart';
 import '../../../services/scroll_preloader.dart';
 import '../../models/meal_model.dart';
+import '../../widgets/connectivity/connected_wrapper.dart';
 import '../../widgets/error/error_view.dart';
 import '../../widgets/loading/loading_view.dart';
 import '../../widgets/meal/meal_grid.dart';
@@ -203,10 +204,20 @@ class ResultsPage extends GetView<ResultsPageController> {
       });
     }
 
-    return ScrollableWrapper(
-      controller: scrollController,
-      title: controller.getPageTitle(),
-      child: buildContent(),
+    return ConnectivityWrapper(
+      errorBuilder: (retryCallback) => ScrollableWrapper(
+        controller: scrollController,
+        title: controller.getPageTitle(),
+        child: ErrorView(
+          errString: TextConstants.noInternetError,
+          onRetry: retryCallback,
+        ),
+      ),
+      child: ScrollableWrapper(
+        controller: scrollController,
+        title: controller.getPageTitle(),
+        child: buildContent(),
+      ),
     );
   }
 }
