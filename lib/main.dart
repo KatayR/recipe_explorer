@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:recipe_explorer/constants/text_constants.dart';
 import 'screens/home/home_page.dart';
 import 'services/storage_service.dart';
+import 'services/connectivity_service.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized before using platform channels
@@ -15,6 +16,7 @@ void main() async {
   
   // Initialize GetX services
   Get.put(StorageService());
+  Get.put(ConnectivityService());
   
   runApp(const RecipeExplorer());
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:recipe_explorer/constants/text_constants.dart';
 import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../services/connectivity_service.dart';
@@ -41,7 +42,7 @@ class ConnectivityWrapper extends StatefulWidget {
 }
 
 class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
-  final ConnectivityService _connectivity = ConnectivityService.instance;
+  final ConnectivityService _connectivity = Get.find<ConnectivityService>();
   bool _isConnected = false;
   bool _isInitialized = false;
 
