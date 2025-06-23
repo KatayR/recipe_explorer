@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:recipe_explorer/constants/text_constants.dart';
 import 'screens/home/home_page.dart';
 import 'services/storage_service.dart';
@@ -19,7 +20,7 @@ class RecipeExplorer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       // Configure scroll behavior to support multiple input devices
       scrollBehavior: const MaterialScrollBehavior().copyWith(
