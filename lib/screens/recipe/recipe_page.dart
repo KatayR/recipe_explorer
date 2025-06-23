@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:recipe_explorer/constants/text_constants.dart';
 import 'package:recipe_explorer/constants/ui_constants.dart';
 import 'package:recipe_explorer/widgets/error/error_view.dart';
@@ -11,7 +12,67 @@ import 'widgets/header.dart';
 import 'widgets/ingredients.dart';
 import 'widgets/metadata.dart';
 
-class RecipePage extends StatefulWidget {
+class RecipePageController extends GetxController {
+  final ApiController _apiController = Get.find<ApiController>();
+  final FavoritesController _favoritesController = Get.find<FavoritesController>();
+
+  var meal = Rx<Meal?>(null);
+  var isLoading = true.obs;
+  var error = Rx<String?>(null);
+
+  String get mealId => _mealId;
+  String get mealName => _mealName;
+  
+  late String _mealId;
+  late String _mealName;
+
+  void initialize(String mealId, String mealName) {
+    _mealId = mealId;
+    _mealName = mealName;
+    loadMealDetails();
+  }
+
+  bool get isFavorite => _favoritesController.isFavorite(mealId);
+
+  /// Loads the details of the meal.
+  ///
+  /// This method first checks if the meal is saved as a favorite. If it is,
+  /// it loads the saved details. Otherwise, it fetches the meal details from
+  /// the API. If an error occurs during the fetch, an error message is displayed.
+  Future<void> loadMealDetails() async {
+    isLoading.value = true;
+    error.value = null;
+
+    final savedMeal = await _favoritesController.loadMealIfSaved(mealId);
+    if (savedMeal != null) {
+      meal.value = savedMeal;
+      isLoading.value = false;
+      return;
+    }
+
+    final response = await _apiController.searchMealsByName(mealName);
+    isLoading.value = false;
+    if (response.error != null) {
+      error.value = TextConstants.recipeLoadingError;
+    } else if (response.data != null && response.data!.isNotEmpty) {
+      meal.value = Meal.fromJson(response.data!.first);
+    } else {
+      error.value = 'Meal not found';
+    }
+  }
+
+  /// Toggles the favorite status of the meal.
+  ///
+  /// This method updates the favorite status of the meal by calling the
+  /// [FavoritesController]. If the meal is marked as a favorite, it is saved;
+  /// otherwise, it is removed from the favorites.
+  Future<void> toggleFavorite() async {
+    if (meal.value == null) return;
+    await _favoritesController.toggleFavorite(meal.value!);
+  }
+}
+
+class RecipePage extends GetView<RecipePageController> {
   final String mealId;
   final String mealName;
 
@@ -22,86 +83,31 @@ class RecipePage extends StatefulWidget {
   });
 
   @override
-  State<RecipePage> createState() => _RecipePageState();
-}
-
-class _RecipePageState extends State<RecipePage> {
-  final ApiService _apiService = ApiService();
-  final FavoritesService _favoritesService = FavoritesService();
-
-  Meal? _meal;
-  bool _isLoading = true;
-  bool _isFavorite = false;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadMealDetails();
-  }
-
-  /// Loads the details of the meal.
-  ///
-  /// This method first checks if the meal is saved as a favorite. If it is,
-  /// it loads the saved details. Otherwise, it fetches the meal details from
-  /// the API. If an error occurs during the fetch, an error message is displayed.
-  Future<void> _loadMealDetails() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    final savedMeal = await _favoritesService.loadMealIfSaved(widget.mealId);
-    if (savedMeal != null) {
-      setState(() {
-        _meal = savedMeal;
-        _isFavorite = true;
-        _isLoading = false;
-      });
-      return;
-    }
-
-    final response = await _apiService.searchMealsByName(widget.mealName);
-    setState(() {
-      _isLoading = false;
-      if (response.error != null) {
-        _error = TextConstants.recipeLoadingError;
-      } else if (response.data != null && response.data!.isNotEmpty) {
-        _meal = Meal.fromJson(response.data!.first);
-      } else {
-        _error = 'Meal not found';
-      }
-    });
-  }
-
-  /// Toggles the favorite status of the meal.
-  ///
-  /// This method updates the favorite status of the meal by calling the
-  /// [FavoritesService]. If the meal is marked as a favorite, it is saved;
-  /// otherwise, it is removed from the favorites.
-  Future<void> _toggleFavorite() async {
-    if (_meal == null) return;
-    final newStatus = await _favoritesService.toggleFavorite(_meal!);
-    setState(() => _isFavorite = newStatus);
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initialize controller with meal data
+    Get.put(RecipePageController(), tag: mealId);
+    final controller = Get.find<RecipePageController>(tag: mealId);
+    controller.initialize(mealId, mealName);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.mealName),
+        title: Text(mealName),
         actions: [
-          if (_meal != null)
-            IconButton(
-              icon: Icon(
-                _isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: _isFavorite ? Colors.red : null,
-              ),
-              onPressed: _toggleFavorite,
-            ),
+          Obx(() {
+            if (controller.meal.value != null) {
+              return IconButton(
+                icon: Icon(
+                  controller.isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: controller.isFavorite ? Colors.red : null,
+                ),
+                onPressed: controller.toggleFavorite,
+              );
+            }
+            return const SizedBox.shrink();
+          }),
         ],
       ),
-      body: _buildBody(),
+      body: Obx(() => _buildBody(controller)),
     );
   }
 
@@ -112,40 +118,44 @@ class _RecipePageState extends State<RecipePage> {
   /// - An error view if an error occurred during the fetch.
   /// - A message indicating no meal details are available if the meal is null.
   /// - The meal details if the meal is successfully fetched.
-  Widget _buildBody() {
-    if (_isLoading) {
+  Widget _buildBody(RecipePageController controller) {
+    if (controller.isLoading.value) {
       return const LoadingView();
     }
 
-    if (_error != null) {
-      return ErrorView(onRetry: _loadMealDetails, errString: _error!);
+    if (controller.error.value != null) {
+      return ErrorView(
+        onRetry: controller.loadMealDetails,
+        errString: controller.error.value!,
+      );
     }
 
-    if (_meal == null) {
+    if (controller.meal.value == null) {
       return const Center(child: Text(TextConstants.noMealDetailsError));
     }
 
+    final meal = controller.meal.value!;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(UIConstants.doublePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           RecipeHeader(
-            mealId: _meal!.idMeal,
-            imageUrl: _meal!.strMealThumb,
+            mealId: meal.idMeal,
+            imageUrl: meal.strMealThumb,
             ingredientsSection: RecipeIngredientsSection(
-              ingredients: _meal!.ingredients,
-              measures: _meal!.measures,
+              ingredients: meal.ingredients,
+              measures: meal.measures,
             ),
           ),
           const SizedBox(height: UIConstants.defaultSpacing),
           RecipeInstructionsSection(
-            instructions: _meal!.strInstructions,
+            instructions: meal.strInstructions,
           ),
           const SizedBox(height: UIConstants.defaultSpacing),
           RecipeMetadataSection(
-            category: _meal!.strCategory,
-            area: _meal!.strArea,
+            category: meal.strCategory,
+            area: meal.strArea,
           ),
         ],
       ),
