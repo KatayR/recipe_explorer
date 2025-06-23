@@ -5,6 +5,40 @@ import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../services/connectivity_service.dart';
 import '../error/error_view.dart';
 
+/// Controller for the ConnectivityWrapper widget that manages connectivity state.
+class ConnectivityWrapperController extends GetxController {
+  final ConnectivityService _connectivity = Get.find<ConnectivityService>();
+  
+  final isConnected = false.obs;
+  final isInitialized = false.obs;
+  
+  @override
+  void onInit() {
+    super.onInit();
+    _initConnectivity();
+    _setupConnectivityListener();
+  }
+  
+  /// Initializes the connectivity check and updates the state accordingly.
+  Future<void> initConnectivity() async {
+    final connected = await _connectivity.checkConnectivity();
+    isConnected.value = connected;
+    isInitialized.value = true;
+  }
+  
+  Future<void> _initConnectivity() async {
+    await initConnectivity();
+  }
+  
+  /// Sets up a listener for connectivity changes and updates the state when
+  /// the connectivity status changes.
+  void _setupConnectivityListener() {
+    _connectivity.onConnectedChanged.listen((connected) {
+      isConnected.value = connected;
+    });
+  }
+}
+
 /// A widget that wraps its child with connectivity checking functionality.
 ///
 /// The `ConnectivityWrapper` listens to connectivity changes and displays
@@ -27,74 +61,44 @@ import '../error/error_view.dart';
 ///
 /// The `ConnectivityWrapper` relies on a `ConnectivityService` to check and
 /// listen for connectivity changes.
-class ConnectivityWrapper extends StatefulWidget {
+class ConnectivityWrapper extends StatelessWidget {
   final Widget child;
   final Widget Function(VoidCallback retryCallback)? errorBuilder;
+  final String? controllerTag;
 
   const ConnectivityWrapper({
     super.key,
     required this.child,
     this.errorBuilder,
+    this.controllerTag,
   });
 
   @override
-  State<ConnectivityWrapper> createState() => _ConnectivityWrapperState();
-}
-
-class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
-  final ConnectivityService _connectivity = Get.find<ConnectivityService>();
-  bool _isConnected = false;
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initConnectivity();
-    _setupConnectivityListener();
-  }
-
-  /// Initializes the connectivity check and updates the state accordingly.
-  Future<void> _initConnectivity() async {
-    final isConnected = await _connectivity.checkConnectivity();
-    if (mounted) {
-      setState(() {
-        _isConnected = isConnected;
-        _isInitialized = true;
-      });
-    }
-  }
-
-  /// Sets up a listener for connectivity changes and updates the state when
-  /// the connectivity status changes.
-  void _setupConnectivityListener() {
-    _connectivity.onConnectedChanged.listen((isConnected) {
-      if (mounted) {
-        setState(() {
-          _isConnected = isConnected;
-        });
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Show loading until initial check is complete
-    if (!_isInitialized) {
-      return const LoadingView();
-    }
-
-    // Show error view if not connected to the internet
-    if (!_isConnected) {
-      if (widget.errorBuilder != null) {
-        return widget.errorBuilder!(_initConnectivity);
+    // Initialize controller with unique tag to avoid conflicts
+    final uniqueTag = controllerTag ?? UniqueKey().toString();
+    Get.put(ConnectivityWrapperController(), tag: uniqueTag);
+    final controller = Get.find<ConnectivityWrapperController>(tag: uniqueTag);
+    
+    return Obx(() {
+      // Show loading until initial check is complete
+      if (!controller.isInitialized.value) {
+        return const LoadingView();
       }
-      return ErrorView(
-        errString: TextConstants.noInternetError,
-        onRetry: _initConnectivity,
-      );
-    }
 
-    // Show the child widget if connected to the internet
-    return widget.child;
+      // Show error view if not connected to the internet
+      if (!controller.isConnected.value) {
+        if (errorBuilder != null) {
+          return errorBuilder!(controller.initConnectivity);
+        }
+        return ErrorView(
+          errString: TextConstants.noInternetError,
+          onRetry: controller.initConnectivity,
+        );
+      }
+
+      // Show the child widget if connected to the internet
+      return child;
+    });
   }
 }

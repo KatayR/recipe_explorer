@@ -91,7 +91,7 @@ class DefaultRecipesSection extends GetView<DefaultRecipesSectionController> {
       await scrollPreloader!.initialize(context);
 
       // Set up scroll listener to delegate to the service
-      scrollController?.addListener(() {
+      scrollController.addListener(() {
         scrollPreloader!.onScroll(scrollController);
       });
     }

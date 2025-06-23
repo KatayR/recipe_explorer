@@ -30,93 +30,89 @@
 /// The text field input is managed by a [TextEditingController], which is disposed of in the [dispose] method.
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../constants/text_constants.dart';
 import '../../../constants/ui_constants.dart';
 
-class CustomSearchBar extends StatefulWidget {
+class CustomSearchBarController extends GetxController {
+  final TextEditingController textController = TextEditingController();
+  final byName = true.obs;
+  final byIngredient = false.obs;
+
+  @override
+  void onClose() {
+    textController.dispose();
+    super.onClose();
+  }
+
+  void handleSearch(Function(String, {bool byName, bool byIngredient}) onSearch) {
+    final query = textController.text.trim();
+    if (query.isNotEmpty) {
+      onSearch(
+        query,
+        byName: byName.value,
+        byIngredient: byIngredient.value,
+      );
+      textController.clear();
+    }
+  }
+
+  void showFilterDialog(BuildContext context) {
+    Get.dialog(
+      AlertDialog(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(left: 24.0),
+              child: Text(TextConstants.filtersTitle),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: Get.back,
+              ),
+            ),
+          ],
+        ),
+        content: Obx(() => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CheckboxListTile(
+              title: const Text(TextConstants.searchByName),
+              value: byName.value,
+              onChanged: (value) => byName.value = value ?? false,
+            ),
+            CheckboxListTile(
+              title: const Text(TextConstants.searchByIngredient),
+              value: byIngredient.value,
+              onChanged: (value) => byIngredient.value = value ?? false,
+            ),
+          ],
+        )),
+      ),
+    );
+  }
+}
+
+class CustomSearchBar extends GetView<CustomSearchBarController> {
   final Function(String, {bool byName, bool byIngredient}) onSearch;
+  final String? controllerTag;
 
   const CustomSearchBar({
     super.key,
     required this.onSearch,
+    this.controllerTag,
   });
 
   @override
-  State<CustomSearchBar> createState() => _CustomSearchBarState();
-}
-
-class _CustomSearchBarState extends State<CustomSearchBar> {
-  final _controller = TextEditingController();
-  bool _byName = true;
-  bool _byIngredient = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _handleSearch() {
-    final query = _controller.text.trim();
-    if (query.isNotEmpty) {
-      widget.onSearch(
-        query,
-        byName: _byName,
-        byIngredient: _byIngredient,
-      );
-      _controller.clear();
-    }
-  }
-
-  void _showFilterDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 24.0),
-                child: Text(TextConstants.filtersTitle),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                child: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CheckboxListTile(
-                title: const Text(TextConstants.searchByName),
-                value: _byName,
-                onChanged: (value) {
-                  setState(() => _byName = value ?? false);
-                },
-              ),
-              CheckboxListTile(
-                title: const Text(TextConstants.searchByIngredient),
-                value: _byIngredient,
-                onChanged: (value) {
-                  setState(() => _byIngredient = value ?? false);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initialize controller with unique tag to avoid conflicts
+    final uniqueTag = controllerTag ?? UniqueKey().toString();
+    Get.put(CustomSearchBarController(), tag: uniqueTag);
+    final controller = Get.find<CustomSearchBarController>(tag: uniqueTag);
+    
     return Expanded(
       child: Material(
         elevation: 2,
@@ -130,20 +126,20 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             children: [
               Expanded(
                 child: TextField(
-                  controller: _controller,
+                  controller: controller.textController,
                   decoration: const InputDecoration(
                     hintText: TextConstants.searchHint,
                     prefixIcon: Icon(Icons.search),
                     border: InputBorder.none,
                   ),
-                  onSubmitted: (_) => _handleSearch(),
+                  onSubmitted: (_) => controller.handleSearch(onSearch),
                 ),
               ),
 
               // Filter Icon Button
               IconButton(
                 icon: const Icon(Icons.tune),
-                onPressed: () => _showFilterDialog(context),
+                onPressed: () => controller.showFilterDialog(context),
               ),
             ],
           ),

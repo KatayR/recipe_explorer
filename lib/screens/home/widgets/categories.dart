@@ -105,6 +105,43 @@ class CategoriesSection extends GetView<CategoriesSectionController> {
   }
 }
 
+/// Controller for the CategoryList widget that manages scroll state.
+class CategoryListController extends GetxController {
+  final ScrollController scrollController = ScrollController();
+  final showLeftArrow = false.obs;
+  final showRightArrow = true.obs;
+  
+  @override
+  void onInit() {
+    super.onInit();
+    scrollController.addListener(_updateArrows);
+  }
+  
+  @override
+  void onClose() {
+    scrollController.dispose();
+    super.onClose();
+  }
+  
+  /// Updates the visibility of the scroll arrows based on the scroll position.
+  void _updateArrows() {
+    showLeftArrow.value = scrollController.position.pixels > 0;
+    showRightArrow.value = scrollController.position.pixels < scrollController.position.maxScrollExtent;
+  }
+  
+  /// Scrolls the list view in the specified direction.
+  ///
+  /// The [direction] parameter specifies the direction to scroll.
+  /// A positive value scrolls to the right, and a negative value scrolls to the left.
+  void scroll(double direction) {
+    scrollController.animateTo(
+      scrollController.offset + (direction * 200),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+}
+
 /// A widget that displays a list of categories in a horizontal scrollable view.
 ///
 /// The [CategoryList] widget displays a list of categories and allows users to
@@ -112,69 +149,30 @@ class CategoriesSection extends GetView<CategoriesSectionController> {
 ///
 /// The [categories] parameter specifies the list of categories to display.
 /// The [onCategorySelected] callback is triggered when a category is selected.
-class CategoryList extends StatefulWidget {
+class CategoryList extends GetView<CategoryListController> {
   /// List of categories to display.
   final List<Category> categories;
 
   /// Callback function triggered when a category is selected.
   final Function(String category) onCategorySelected;
+  
+  final String? controllerTag;
 
   /// Creates a [CategoryList] widget.
   const CategoryList({
     super.key,
     required this.categories,
     required this.onCategorySelected,
+    this.controllerTag,
   });
 
   @override
-  State<CategoryList> createState() => _CategoryListState();
-}
-
-class _CategoryListState extends State<CategoryList> {
-  /// Scroll controller for the horizontal list view.
-  final ScrollController _scrollController = ScrollController();
-
-  /// Indicates whether the left scroll arrow should be shown.
-  bool _showLeftArrow = false;
-
-  /// Indicates whether the right scroll arrow should be shown.
-  bool _showRightArrow = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_updateArrows);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  /// Updates the visibility of the scroll arrows based on the scroll position.
-  void _updateArrows() {
-    setState(() {
-      _showLeftArrow = _scrollController.position.pixels > 0;
-      _showRightArrow = _scrollController.position.pixels <
-          _scrollController.position.maxScrollExtent;
-    });
-  }
-
-  /// Scrolls the list view in the specified direction.
-  ///
-  /// The [direction] parameter specifies the direction to scroll.
-  /// A positive value scrolls to the right, and a negative value scrolls to the left.
-  void _scroll(double direction) {
-    _scrollController.animateTo(
-      _scrollController.offset + (direction * 200),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initialize controller with unique tag to avoid conflicts
+    final uniqueTag = controllerTag ?? UniqueKey().toString();
+    Get.put(CategoryListController(), tag: uniqueTag);
+    final controller = Get.find<CategoryListController>(tag: uniqueTag);
+    
     /// Determines the height based on the device type.
     /// If the device is mobile, the height is set to 100.0.
     /// Otherwise, the height is set to 120.0.
@@ -183,7 +181,7 @@ class _CategoryListState extends State<CategoryList> {
     return MouseRegion(
       child: SizedBox(
         height: height,
-        child: Stack(
+        child: Obx(() => Stack(
           children: [
             ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
@@ -195,42 +193,41 @@ class _CategoryListState extends State<CategoryList> {
                 scrollbars: true,
               ),
               child: ListView.builder(
-                controller: _scrollController,
+                controller: controller.scrollController,
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
-                itemCount: widget.categories.length,
+                itemCount: categories.length,
                 itemBuilder: (context, index) {
-                  final category = widget.categories[index];
+                  final category = categories[index];
                   return CategoryItem(
                     category: category,
-                    onTap: () =>
-                        widget.onCategorySelected(category.strCategory),
+                    onTap: () => onCategorySelected(category.strCategory),
                   );
                 },
               ),
             ),
-            if (_showLeftArrow)
+            if (controller.showLeftArrow.value)
               Positioned(
                 left: 0,
                 top: 0,
                 bottom: 0,
                 child: _ScrollArrow(
                   direction: -1,
-                  onTap: () => _scroll(-1),
+                  onTap: () => controller.scroll(-1),
                 ),
               ),
-            if (_showRightArrow)
+            if (controller.showRightArrow.value)
               Positioned(
                 right: 0,
                 top: 0,
                 bottom: 0,
                 child: _ScrollArrow(
                   direction: 1,
-                  onTap: () => _scroll(1),
+                  onTap: () => controller.scroll(1),
                 ),
               ),
           ],
-        ),
+        )),
       ),
     );
   }
