@@ -96,10 +96,14 @@ class ImagePreloaderService extends GetxService {
     final uncachedUrls = urls.where((url) => !_preloadedUrls.contains(url)).toList();
     final skippedCount = urls.length - uncachedUrls.length;
     
-    debugPrint('Starting to preload ${urls.length} images (${skippedCount} already cached, ${uncachedUrls.length} new)');
+    debugPrint('Starting to preload ${urls.length} images ($skippedCount already cached, ${uncachedUrls.length} new)');
 
     for (int i = 0; i < uncachedUrls.length; i++) {
       final url = uncachedUrls[i];
+      
+      // Check if context is still mounted before using it
+      if (!context.mounted) return;
+      
       await preloadNetworkImage(url, context);
 
       // Add a small delay between each request to avoid overwhelming the server
@@ -108,7 +112,7 @@ class ImagePreloaderService extends GetxService {
       }
     }
 
-    debugPrint('Finished preloading batch: ${uncachedUrls.length} new images cached, ${skippedCount} skipped');
+    debugPrint('Finished preloading batch: ${uncachedUrls.length} new images cached, $skippedCount skipped');
   }
 
   /// Checks whether an image URL has already been preloaded in this session.
