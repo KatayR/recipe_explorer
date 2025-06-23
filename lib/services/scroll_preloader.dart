@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'image_preloader.dart';
 
 /// Service responsible for managing scroll-based progressive image preloading.
@@ -11,7 +12,7 @@ import 'image_preloader.dart';
 /// ```dart
 /// final scrollPreloader = ScrollPreloader(
 ///   imageUrls: mealImageUrls,
-///   imagePreloader: ImagePreloaderService(),
+///   imagePreloader: Get.find<ImagePreloaderService>(),
 /// );
 /// 
 /// // In initState
@@ -34,7 +35,7 @@ class ScrollPreloader {
     required List<String> imageUrls,
     ImagePreloaderService? imagePreloader,
   }) : _imageUrls = imageUrls,
-       _imagePreloader = imagePreloader ?? ImagePreloaderService();
+       _imagePreloader = imagePreloader ?? Get.find<ImagePreloaderService>();
 
   /// Gets the current number of images that have been preloaded.
   int get preloadedCount => _preloadedCount;

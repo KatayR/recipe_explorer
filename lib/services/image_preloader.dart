@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class ImagePreloaderService {
-  static final ImagePreloaderService _instance = ImagePreloaderService._internal();
-  factory ImagePreloaderService() => _instance;
-  ImagePreloaderService._internal();
+class ImagePreloaderService extends GetxService {
 
   /// Cache of URLs that have been successfully preloaded in this session.
   /// 

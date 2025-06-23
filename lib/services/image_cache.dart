@@ -5,7 +5,7 @@
 ///
 /// Usage:
 /// ```dart
-/// final imageCacheService = ImageCacheService.instance;
+/// final imageCacheService = Get.find<ImageCacheService>();
 /// ```
 ///
 /// Methods:
@@ -21,13 +21,12 @@
 ///   the given meal ID.
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
-class ImageCacheService {
-  static final ImageCacheService instance = ImageCacheService._init();
-  ImageCacheService._init();
+class ImageCacheService extends GetxService {
 
   Future<String> getCachedImagePath(String mealId) async {
     // Simply use the meal ID as filename

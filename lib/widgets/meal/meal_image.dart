@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../constants/text_constants.dart';
 import '../../services/image_cache.dart';
 import '../loading/loading_view.dart';
@@ -25,6 +26,7 @@ class MealImage extends StatefulWidget {
 }
 
 class _MealImageState extends State<MealImage> {
+  final ImageCacheService _imageCacheService = Get.find<ImageCacheService>();
   String? _cachedPath;
   bool _isLoading = true;
 
@@ -39,7 +41,7 @@ class _MealImageState extends State<MealImage> {
     try {
       // Checking if image is already cached
       final existingPath =
-          await ImageCacheService.instance.getCachedImagePath(widget.mealId);
+          await _imageCacheService.getCachedImagePath(widget.mealId);
       final file = File(existingPath);
 
       if (await file.exists()) {
@@ -53,7 +55,7 @@ class _MealImageState extends State<MealImage> {
       }
 
       // If not cached, downloading and caching it
-      final cachedPath = await ImageCacheService.instance.cacheImage(
+      final cachedPath = await _imageCacheService.cacheImage(
         widget.mealId,
         widget.imageUrl,
       );
