@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:recipe_explorer/screens/home/widgets/favorites_button.dart';
 import 'package:recipe_explorer/widgets/connectivity/connected_wrapper.dart';
 import '../../../services/api_service.dart';
@@ -11,25 +12,8 @@ import 'widgets/custom_search_bar.dart';
 import 'widgets/default_recipes.dart';
 import '../results/results_page.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-
-  // If you dont add the following ignore thingy, you will get a false-positive
-  // ignore: library_private_types_in_public_api
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final ApiService _apiService = ApiService();
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void _onCategorySelected(String category) {
+class HomePageController extends GetxController {
+  void onCategorySelected(String category, BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -38,7 +22,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _searchMeals(String query,
+  void searchMeals(String query, BuildContext context,
       {bool byName = true, bool byIngredient = false}) {
     if (query.trim().isNotEmpty) {
       Navigator.push(
@@ -53,9 +37,16 @@ class _HomePageState extends State<HomePage> {
       );
     }
   }
+}
+
+class HomePage extends GetView<HomePageController> {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Initialize controller
+    Get.put(HomePageController());
+
     return Scaffold(
       body: SafeArea(
         child: ConnectivityWrapper(
@@ -74,7 +65,6 @@ class _HomePageState extends State<HomePage> {
           ),
           child: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
-              // const HomeAppBar(),
               SliverToBoxAdapter(
                 child: Column(
                   children: [
@@ -83,22 +73,26 @@ class _HomePageState extends State<HomePage> {
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          CustomSearchBar(onSearch: _searchMeals),
+                          CustomSearchBar(
+                            onSearch: (query, {bool byName = true, bool byIngredient = false}) =>
+                                controller.searchMeals(query, context,
+                                    byName: byName, byIngredient: byIngredient),
+                          ),
                           const SizedBox(width: 8),
-                          // Match the same padding structure used in offline state
-                          FavoritesButton(),
+                          const FavoritesButton(),
                         ],
                       ),
                     ),
                     CategoriesSection(
-                      onCategorySelected: _onCategorySelected,
+                      onCategorySelected: (category) =>
+                          controller.onCategorySelected(category, context),
                     ),
                     const Divider(),
                   ],
                 ),
               ),
             ],
-            body: DefaultRecipesSection(apiService: _apiService),
+            body: DefaultRecipesSection(apiService: ApiService()),
           ),
         ),
       ),
