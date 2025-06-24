@@ -18,6 +18,7 @@ import 'dart:ui';
 import '../../../widgets/loading/loading_view.dart';
 import '../../../widgets/error/error_view.dart';
 import '../../../services/api_service.dart';
+import '../../../constants/app_constants.dart';
 import '../../../models/category_model.dart';
 import '../../../utils/responsive_helper.dart';
 
@@ -130,7 +131,7 @@ class CategoryListController extends GetxController {
   /// A positive value scrolls to the right, and a negative value scrolls to the left.
   void scroll(double direction) {
     scrollController.animateTo(
-      scrollController.offset + (direction * 200),
+      scrollController.offset + (direction * AppConstants.categoryScrollOffset),
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
@@ -169,9 +170,9 @@ class CategoryList extends GetView<CategoryListController> {
     final controller = Get.find<CategoryListController>(tag: uniqueTag);
     
     /// Determines the height based on the device type.
-    /// If the device is mobile, the height is set to 100.0.
-    /// Otherwise, the height is set to 120.0.
-    final height = ResponsiveHelper.isMobile(context) ? 100.0 : 120.0;
+    /// If the device is mobile, the height is set to mobile value.
+    /// Otherwise, the height is set to desktop value.
+    final height = ResponsiveHelper.isMobile(context) ? AppConstants.mobileCategoryHeight : AppConstants.desktopCategoryHeight;
 
     return MouseRegion(
       child: SizedBox(
@@ -312,7 +313,7 @@ class CategoryItem extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: isDesktop ? 150 : 90,
+          width: isDesktop ? AppConstants.desktopCategoryWidth : AppConstants.mobileCategoryWidth,
           margin: const EdgeInsets.symmetric(horizontal: 8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -331,7 +332,7 @@ class CategoryItem extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 category.strCategory,
-                style: TextStyle(fontSize: isDesktop ? 14 : 12),
+                style: TextStyle(fontSize: isDesktop ? AppConstants.desktopCategoryTextSize : AppConstants.mobileCategoryTextSize),
                 textAlign: TextAlign.center,
               ),
             ],

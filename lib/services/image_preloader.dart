@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../constants/app_constants.dart';
 
 class ImagePreloaderService extends GetxService {
 
@@ -14,7 +15,7 @@ class ImagePreloaderService extends GetxService {
   final Map<String, DateTime> _lruCache = <String, DateTime>{};
 
   /// Standard initial preload count applied consistently across all screens.
-  static const int standardPreloadCount = 15;
+  static const int standardPreloadCount = AppConstants.standardImagePreloadCount;
 
   /// Progressive preloading algorithm documentation.
   /// 
@@ -38,8 +39,8 @@ class ImagePreloaderService extends GetxService {
   ///   - scrollPercentage 0.5 → viewing item 18
   ///   - scrollPercentage 0.8 → viewing item 28
   /// 
-  /// ### 4. CALCULATE 20-AHEAD TARGET
-  /// - `targetPreloadCount = (currentItemIndex + 20).clamp(0, totalItems)`
+  /// ### 4. CALCULATE ${AppConstants.scrollAheadPreloadCount}-AHEAD TARGET
+  /// - `targetPreloadCount = (currentItemIndex + ${AppConstants.scrollAheadPreloadCount}).clamp(0, totalItems)`
   /// - Examples with 36 items:
   ///   - viewing item 0 → preload to item 20
   ///   - viewing item 10 → preload to item 30
@@ -84,8 +85,8 @@ class ImagePreloaderService extends GetxService {
       debugPrint(' 🗑️ Evicted oldest cached image: $oldestUrl');
     }
     
-    // Rough memory check (assuming ~500KB per image)
-    final estimatedMemoryMB = _lruCache.length * 0.5;
+    // Rough memory check
+    final estimatedMemoryMB = _lruCache.length * AppConstants.estimatedMemoryPerImageMB;
     if (estimatedMemoryMB > maxMemoryMB) {
       debugPrint(' ⚠️ Estimated memory usage: ${estimatedMemoryMB.toStringAsFixed(1)}MB exceeds limit of ${maxMemoryMB}MB');
     }
@@ -141,7 +142,7 @@ class ImagePreloaderService extends GetxService {
 
       // Add a small delay between each request to avoid overwhelming the server
       if (i < uncachedUrls.length - 1) {
-        await Future.delayed(const Duration(milliseconds: 75));
+        await Future.delayed(const Duration(milliseconds: AppConstants.preloadDelayMs));
       }
     }
 
@@ -160,7 +161,7 @@ class ImagePreloaderService extends GetxService {
   int get cachedImageCount => _lruCache.length;
   
   /// Gets the estimated memory usage in MB (rough calculation)
-  double get estimatedMemoryMB => _lruCache.length * 0.5;
+  double get estimatedMemoryMB => _lruCache.length * AppConstants.estimatedMemoryPerImageMB;
   
   /// Gets cache usage as a percentage of maximum
   double get cacheUsagePercent => (_lruCache.length / maxCacheSize) * 100;

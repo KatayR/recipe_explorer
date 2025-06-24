@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'image_preloader.dart';
+import '../constants/app_constants.dart';
 
 /// Service responsible for managing scroll-based progressive image preloading.
 /// 
@@ -112,17 +113,17 @@ class ScrollPreloader {
 
   /// Calculates the target number of images to preload based on scroll position.
   int _calculatePreloadTarget(_ScrollData scrollData) {
-    // Step 4: Calculate 20-ahead target
-    final targetPreloadCount = (scrollData.currentItemIndex + 20).clamp(0, _imageUrls.length);
+    // Step 4: Calculate ahead target
+    final targetPreloadCount = (scrollData.currentItemIndex + AppConstants.scrollAheadPreloadCount).clamp(0, _imageUrls.length);
     
-    // Step 5: Enforce 15-item minimum for early scrolling in long lists
+    // Step 5: Enforce minimum for early scrolling in long lists
     final proposedTarget = targetPreloadCount < ImagePreloaderService.standardPreloadCount 
         ? ImagePreloaderService.standardPreloadCount 
         : targetPreloadCount;
     
     // Step 6: End-of-list optimization
     final remainingAfterProposed = _imageUrls.length - proposedTarget;
-    final shouldPreloadAll = remainingAfterProposed <= 5;
+    final shouldPreloadAll = remainingAfterProposed <= AppConstants.endOfListThreshold;
     
     return shouldPreloadAll ? _imageUrls.length : proposedTarget;
   }
@@ -136,13 +137,13 @@ class ScrollPreloader {
       return false;
     }
     
-    // If 5 or fewer items remaining, preload all
-    if (currentRemaining <= 5) {
+    // If threshold or fewer items remaining, preload all
+    if (currentRemaining <= AppConstants.endOfListThreshold) {
       return true;
     }
     
-    // Step 7: Spam prevention - only trigger if we need ≥5 more items
-    return targetCount > _preloadedCount + 5;
+    // Step 7: Spam prevention - only trigger if we need ≥threshold more items
+    return targetCount > _preloadedCount + AppConstants.endOfListThreshold;
   }
 
   /// Preloads the initial batch of images on service initialization.

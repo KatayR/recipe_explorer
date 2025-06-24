@@ -1,3 +1,5 @@
+import '../constants/app_constants.dart';
+
 class Meal {
   final String idMeal; // Unique identifier for the meal
   final String strMeal; // Name of the meal
@@ -20,11 +22,11 @@ class Meal {
   });
 
   /// Helper function to extract ingredients from JSON
-  /// Processes up to 20(due to hard-coded API limit) ingredients, skipping empty ones
+  /// Processes up to ${AppConstants.maxIngredientsPerMeal}(due to hard-coded API limit) ingredients, skipping empty ones
   factory Meal.fromJson(Map<String, dynamic> json) {
     List<String> extractIngredients(Map<String, dynamic> json) {
       List<String> ingredients = [];
-      for (int i = 1; i <= 20; i++) {
+      for (int i = 1; i <= AppConstants.maxIngredientsPerMeal; i++) {
         String ingredient = json['strIngredient$i'] ?? '';
         if (ingredient.isNotEmpty) {
           ingredients.add(ingredient);
@@ -34,10 +36,10 @@ class Meal {
     }
 
     /// Helper function to extract measurements from JSON
-    /// Processes up to 20(due to hard-coded API limit) measurements, skipping empty ones
+    /// Processes up to ${AppConstants.maxMeasurementsPerMeal}(due to hard-coded API limit) measurements, skipping empty ones
     List<String> extractMeasures(Map<String, dynamic> json) {
       List<String> measures = [];
-      for (int i = 1; i <= 20; i++) {
+      for (int i = 1; i <= AppConstants.maxMeasurementsPerMeal; i++) {
         String measure = json['strMeasure$i'] ?? '';
         if (measure.isNotEmpty) {
           measures.add(measure);

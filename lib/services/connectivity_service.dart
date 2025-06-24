@@ -22,6 +22,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:recipe_explorer/constants/service_constants.dart';
+import '../constants/app_constants.dart';
 
 class ConnectivityService extends GetxService {
   final Connectivity _connectivity = Connectivity();
@@ -56,9 +57,9 @@ class ConnectivityService extends GetxService {
             Uri.parse(ApiConstants.baseUrl + ApiConstants.randomMealEndpoint),
           )
           .timeout(
-            const Duration(seconds: 5),
+            const Duration(seconds: AppConstants.networkTimeoutSeconds),
           );
-      return response.statusCode == 200;
+      return response.statusCode == AppConstants.httpSuccessCode;
     } catch (e) {
       return false;
     }

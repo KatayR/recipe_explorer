@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:recipe_explorer/constants/service_constants.dart';
+import '../constants/app_constants.dart';
 
 /// Service class for handling all API communications
 class ApiResponse<T> {
@@ -33,7 +34,7 @@ class ApiController extends GetxController {
       
       final response =
           await http.get(Uri.parse('$baseUrl/$categoriesEndpoint'));
-      if (response.statusCode == 200) {
+      if (response.statusCode == AppConstants.httpSuccessCode) {
         final data = json.decode(response.body);
         return ApiResponse(data: data['categories']);
       }
@@ -55,7 +56,7 @@ class ApiController extends GetxController {
     try {
       final response =
           await http.get(Uri.parse('$baseUrl/$searchByNameEndpoint$query'));
-      if (response.statusCode == 200) {
+      if (response.statusCode == AppConstants.httpSuccessCode) {
         final data = json.decode(response.body);
         return ApiResponse(data: data['meals'] ?? []);
       }
@@ -72,7 +73,7 @@ class ApiController extends GetxController {
     try {
       final response = await http
           .get(Uri.parse('$baseUrl/$searchByIngredientEndpoint$ingredient'));
-      if (response.statusCode == 200) {
+      if (response.statusCode == AppConstants.httpSuccessCode) {
         final data = json.decode(response.body);
         return ApiResponse(data: data['meals'] ?? []);
       }
@@ -88,7 +89,7 @@ class ApiController extends GetxController {
     try {
       final response = await http
           .get(Uri.parse('$baseUrl/$filterByCategoryEndpoint$category'));
-      if (response.statusCode == 200) {
+      if (response.statusCode == AppConstants.httpSuccessCode) {
         final data = json.decode(response.body);
         return ApiResponse(data: data['meals'] ?? []);
       }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'meal_image.dart';
+import '../../constants/app_constants.dart';
 
 class MealCard extends StatelessWidget {
   final dynamic meal;
@@ -86,8 +87,8 @@ class MealCard extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 8),
                                       SizedBox(
-                                        width: 20,
-                                        height: 20,
+                                        width: AppConstants.smallIconSize,
+                                        height: AppConstants.smallIconSize,
                                         child: CircularProgressIndicator(
                                           value: loadingProgress.expectedTotalBytes != null
                                               ? loadingProgress.cumulativeBytesLoaded /
