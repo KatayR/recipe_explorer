@@ -116,11 +116,11 @@ class CustomSearchBar extends GetView<CustomSearchBarController> {
     return Expanded(
       child: Material(
         elevation: 2,
-        borderRadius: UIConstants.circularBorderRadious,
+        borderRadius: UIConstants.circularBorderRadius,
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: UIConstants.circularBorderRadious,
+            borderRadius: UIConstants.circularBorderRadius,
           ),
           child: Row(
             children: [

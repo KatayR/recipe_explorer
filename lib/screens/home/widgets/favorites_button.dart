@@ -16,7 +16,7 @@ class FavoritesButton extends StatelessWidget {
       child: Material(
         color: Colors.red.shade50,
         shape: RoundedRectangleBorder(
-          borderRadius: UIConstants.circularBorderRadious,
+          borderRadius: UIConstants.circularBorderRadius,
         ),
         elevation: 2,
         child: IconButton(

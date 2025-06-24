@@ -31,6 +31,6 @@ class UIConstants {
   static const double categoryTextSizeMobile = 12.0;
 
   // Misc
-  static BorderRadius circularBorderRadious = BorderRadius.circular(14);
+  static BorderRadius circularBorderRadius = BorderRadius.circular(14);
   static const double offlineAppBarHeight = 64.4;
 }
