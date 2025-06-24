@@ -5,11 +5,9 @@
 /// state management and displays data in a grid format. If there is an error during
 /// the fetch operation or if the data is still loading, appropriate views are shown.
 ///
-/// This widget requires an instance of `ApiService` to be passed as a required parameter.
-///
 /// Example usage:
 /// ```dart
-/// DefaultRecipesSection(apiService: myApiServiceInstance);
+/// DefaultRecipesSection();
 /// ```
 ///
 /// The widget consists of:
@@ -60,12 +58,7 @@ class DefaultRecipesSectionController extends GetxController {
 }
 
 class DefaultRecipesSection extends GetView<DefaultRecipesSectionController> {
-  final ApiService apiService;
-
-  const DefaultRecipesSection({
-    super.key,
-    required this.apiService,
-  });
+  const DefaultRecipesSection({super.key});
 
   @override
   Widget build(BuildContext context) {

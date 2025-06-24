@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:recipe_explorer/screens/home/widgets/favorites_button.dart';
 import 'package:recipe_explorer/widgets/connectivity/connected_wrapper.dart';
-import '../../../services/api_service.dart';
 import '../../constants/text_constants.dart';
 import '../../constants/ui_constants.dart';
 import '../../widgets/error/error_view.dart';
@@ -88,7 +87,7 @@ class HomePage extends GetView<HomePageController> {
                 ),
               ),
             ],
-            body: DefaultRecipesSection(apiService: ApiService()),
+            body: const DefaultRecipesSection(),
           ),
         ),
       ),

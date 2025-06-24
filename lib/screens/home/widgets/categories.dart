@@ -6,8 +6,6 @@
 ///
 /// The [onCategorySelected] callback is triggered when a category is selected.
 ///
-/// The [apiService] parameter can be used to provide a custom API service for fetching
-/// categories. If not provided, a default [ApiService] instance is used.
 ///
 /// The [CategoriesSection] widget uses GetX reactive state management.
 ///
@@ -65,12 +63,9 @@ class CategoriesSection extends GetView<CategoriesSectionController> {
   /// Callback function triggered when a category is selected.
   final Function(String category) onCategorySelected;
 
-  final ApiService? apiService;
-
   const CategoriesSection({
     super.key,
     required this.onCategorySelected,
-    this.apiService,
   });
 
   @override

@@ -138,17 +138,3 @@ class ApiController extends GetxController {
   }
 }
 
-// Backward compatibility - keep old ApiService for gradual migration
-class ApiService {
-  final ApiController _controller = Get.find<ApiController>();
-  
-  Future<ApiResponse<List<dynamic>>> getCategories() => _controller.getCategories();
-  Future<ApiResponse<List<dynamic>>> searchMealsByName(String query) => _controller.searchMealsByName(query);
-  Future<ApiResponse<List<dynamic>>> searchMealsByIngredient(String ingredient) => _controller.searchMealsByIngredient(ingredient);
-  Future<ApiResponse<List<dynamic>>> getMealsByCategory(String category) => _controller.getMealsByCategory(category);
-  Future<ApiResponse<List<dynamic>>> searchMeals({
-    required String query,
-    bool searchByName = true,
-    bool searchByIngredient = false,
-  }) => _controller.searchMeals(query: query, searchByName: searchByName, searchByIngredient: searchByIngredient);
-}
