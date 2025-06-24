@@ -13,7 +13,7 @@ class UIConstants {
 
   // Padding and spacing
   static const double defaultPadding = 8.0;
-  static const double doublePadding = 8.0;
+  static const double doublePadding = 16.0;
   static const double defaultSpacing = 16.0;
   static const double cardElevation = 2.0;
 
