@@ -133,8 +133,8 @@ class ResultsPage extends GetView<ResultsPageController> {
     // Create a unique tag for this instance
     final tag = '${searchQuery ?? categoryName ?? 'results'}_${DateTime.now().millisecondsSinceEpoch}';
     
-    // Initialize controller with search parameters
-    Get.put(ResultsPageController(), tag: tag);
+    // Initialize controller with search parameters only if not already created
+    Get.lazyPut(() => ResultsPageController(), tag: tag);
     final controller = Get.find<ResultsPageController>(tag: tag);
     controller.initialize(
       searchQuery: searchQuery,

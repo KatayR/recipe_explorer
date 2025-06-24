@@ -75,8 +75,8 @@ class CategoriesSection extends GetView<CategoriesSectionController> {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller if not already done
-    Get.put(CategoriesSectionController(), tag: 'categories');
+    // Initialize controller only if not already created
+    Get.lazyPut(() => CategoriesSectionController(), tag: 'categories');
     final controller = Get.find<CategoriesSectionController>(tag: 'categories');
 
     return Obx(() {

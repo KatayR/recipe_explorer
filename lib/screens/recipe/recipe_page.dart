@@ -84,8 +84,8 @@ class RecipePage extends GetView<RecipePageController> {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller with meal data
-    Get.put(RecipePageController(), tag: mealId);
+    // Initialize controller with meal data only if not already created
+    Get.lazyPut(() => RecipePageController(), tag: mealId);
     final controller = Get.find<RecipePageController>(tag: mealId);
     controller.initialize(mealId, mealName);
 

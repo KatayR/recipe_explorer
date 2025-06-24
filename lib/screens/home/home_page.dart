@@ -41,8 +41,8 @@ class HomePage extends GetView<HomePageController> {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller
-    Get.put(HomePageController());
+    // Initialize controller only if not already created
+    Get.lazyPut(() => HomePageController());
 
     return Scaffold(
       body: SafeArea(

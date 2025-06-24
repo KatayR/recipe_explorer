@@ -69,8 +69,8 @@ class DefaultRecipesSection extends GetView<DefaultRecipesSectionController> {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller
-    Get.put(DefaultRecipesSectionController(), tag: 'default_recipes');
+    // Initialize controller only if not already created
+    Get.lazyPut(() => DefaultRecipesSectionController(), tag: 'default_recipes');
     final controller = Get.find<DefaultRecipesSectionController>(tag: 'default_recipes');
     
     // Get the primary scroll controller which is set by NestedScrollView
