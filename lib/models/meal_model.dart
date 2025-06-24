@@ -47,8 +47,8 @@ class Meal {
     }
 
     return Meal(
-      idMeal: json['idMeal'],
-      strMeal: json['strMeal'],
+      idMeal: json['idMeal'] ?? '',
+      strMeal: json['strMeal'] ?? 'Unknown Recipe',
       strCategory: json['strCategory'] ?? '',
       strArea: json['strArea'] ?? '',
       strInstructions: json['strInstructions'] ?? '',
