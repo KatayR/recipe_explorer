@@ -3,7 +3,7 @@ class ApiConstants {
   static const String randomMealEndpoint = '/random.php';
   static const String categoriesEndpoint = '/categories.php';
   static const String searchByNameEndpoint = '/search.php?s=';
-  static const String filterByCategoryEndpoint = 'filter.php?c=';
+  static const String filterByCategoryEndpoint = '/filter.php?c=';
   static const String searchByIngredientEndpoint = '/filter.php?i=';
 
   // HTTP timeout duration
