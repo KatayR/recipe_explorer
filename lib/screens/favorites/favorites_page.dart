@@ -1,4 +1,4 @@
-/// A stateful widget that displays the user's favorite recipes.
+/// A GetX widget that displays the user's favorite recipes.
 ///
 /// The `FavoritesPage` widget fetches and displays a list of favorite meals
 /// from the `FavoritesService`. It shows a loading indicator while the data

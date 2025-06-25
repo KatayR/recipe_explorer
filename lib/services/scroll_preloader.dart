@@ -16,11 +16,11 @@ import '../constants/app_constants.dart';
 ///   imagePreloader: Get.find<ImagePreloaderService>(),
 /// );
 /// 
-/// // In initState
+/// // In controller onInit or widget onReady
 /// scrollPreloader.initialize(context);
 /// scrollController.addListener(() => scrollPreloader.onScroll(scrollController));
 /// 
-/// // In dispose
+/// // In controller onClose or widget dispose
 /// scrollPreloader.dispose();
 /// ```
 class ScrollPreloader {

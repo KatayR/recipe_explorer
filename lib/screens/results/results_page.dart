@@ -1,4 +1,4 @@
-/// A stateful widget that displays search results or meals by category.
+/// A GetX widget that displays search results or meals by category.
 ///
 /// The [ResultsPage] widget fetches and displays a list of meals based on the
 /// provided search query or category name.

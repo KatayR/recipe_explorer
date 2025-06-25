@@ -6,8 +6,8 @@
 /// The [onSearch] callback is triggered when a search is performed, passing the search query
 /// and the selected search criteria.
 ///
-/// The widget maintains the state of the search criteria (by name or by ingredient) and the
-/// text field input.
+/// The widget uses GetX reactive variables to manage search criteria (by name or by ingredient) and
+/// text field input through a dedicated controller.
 ///
 /// Example usage:
 ///
@@ -20,14 +20,14 @@
 /// ```
 ///
 /// The filter dialog allows users to select whether to search by name, by ingredient, or both.
-/// The search criteria are stored in the [_byName] and [_byIngredient] state variables.
+/// The search criteria are stored in the reactive [byName] and [byIngredient] variables.
 ///
-/// The [_handleSearch] method is called when a search is performed, and it triggers the [onSearch]
+/// The [handleSearch] method is called when a search is performed, and it triggers the [onSearch]
 /// callback with the current search query and criteria.
 ///
-/// The [_showFilterDialog] method displays a dialog with checkboxes for selecting the search criteria.
+/// The [showFilterDialog] method displays a dialog with checkboxes for selecting the search criteria.
 ///
-/// The text field input is managed by a [TextEditingController], which is disposed of in the [dispose] method.
+/// The text field input is managed by a [TextEditingController], which is disposed of in the [onClose] method.
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
