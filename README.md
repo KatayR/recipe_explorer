@@ -87,6 +87,36 @@ lib/
 - When you make a search by name, maximum of 25 results gets listed(API limitation). 
 - May cause unexpected hunger
 
+## 🎯 Planned Features & Enhancements
+
+### 🔥 High Priority Features
+- [ ] **Random Recipe Discovery** - Add random recipe button using `/random.php` endpoint for daily cooking inspiration
+- [ ] **Search by Cuisine/Area** - Filter recipes by country/cuisine (Italian, Mexican, Chinese, etc.) using `/filter.php?a=` endpoint
+- [ ] **Countries Category Section** - Add dedicated section for browsing recipes by country using `/list.php?a=list`
+- [ ] **Sharable Shopping List Generator** - Create and share shopping lists from selected recipes with quantities
+
+### 🚀 Core Enhancements
+- [ ] **Search History** - Store and suggest previous searches for better user experience
+- [ ] **Personal Recipe Notes** - Add cooking notes and modifications to saved recipes
+- [ ] **Cooking Timers** - Integrate timers for recipes with time-based cooking processes
+- [ ] **Recipe Sharing** - Export and share recipes via PDF, image, or text format
+- [ ] **Favorites Search** - Search functionality within saved favorite recipes
+- [ ] **Custom Recipe Tags** - Add custom tags to favorites (breakfast, snack, dinner, etc.)
+- [ ] **Dietary Labels** - Add dietary indicators (vegetarian, vegan, gluten-free, etc.)
+- [ ] **Allergy Warnings** - Highlight common allergens in recipes
+- [ ] **Cooking Time Estimates** - Display prep time and cooking time for better planning
+
+### 🌟 Advanced Features
+- [ ] **Basic Nutrition Estimates** - Display approximate calories, protein, carbs, and fat content
+- [ ] **AI Integration** - Launch installed AI apps (ChatGPT, Gemini) with current recipe for live cooking assistance
+- [ ] **Cross-Device Sync** - Sync favorited meals across multiple devices using cloud storage
+
+### 📊 Implementation Priority
+1. **Phase 1**: Random recipes, cuisine search, countries category
+2. **Phase 2**: Shopping list, search history, recipe notes
+3. **Phase 3**: Sharing features, dietary labels, cooking timers
+4. **Phase 4**: Advanced features and AI integration
+
 ## 🔄 Architecture Evolution
 - **Previously**: Used traditional Flutter setState() for state management per client requirements
 - **Current**: Migrated to GetX architecture for improved reactivity and maintainability
