@@ -33,6 +33,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../constants/text_constants.dart';
 import '../../../constants/ui_constants.dart';
+import '../../../utils/input_validator.dart';
 
 class CustomSearchBarController extends GetxController {
   final TextEditingController textController = TextEditingController();
@@ -46,15 +47,44 @@ class CustomSearchBarController extends GetxController {
   }
 
   void handleSearch(Function(String, {bool byName, bool byIngredient}) onSearch) {
-    final query = textController.text.trim();
-    if (query.isNotEmpty) {
-      onSearch(
-        query,
-        byName: byName.value,
-        byIngredient: byIngredient.value,
+    final query = textController.text;
+    
+    // Validate search query
+    final queryValidation = InputValidator.validateSearchQuery(query);
+    if (!queryValidation.isValid) {
+      Get.snackbar(
+        'Invalid Search',
+        queryValidation.errorMessage!,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade800,
+        margin: const EdgeInsets.all(16),
       );
-      textController.clear();
+      return;
     }
+    
+    // Validate search filters
+    final filterValidation = InputValidator.validateSearchFilters(byName.value, byIngredient.value);
+    if (!filterValidation.isValid) {
+      Get.snackbar(
+        'No Search Filter Selected',
+        filterValidation.errorMessage!,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange.shade100,
+        colorText: Colors.orange.shade800,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+    
+    // Sanitize and execute search
+    final sanitizedQuery = InputValidator.sanitizeSearchQuery(query);
+    onSearch(
+      sanitizedQuery,
+      byName: byName.value,
+      byIngredient: byIngredient.value,
+    );
+    textController.clear();
   }
 
   void showFilterDialog(BuildContext context) {

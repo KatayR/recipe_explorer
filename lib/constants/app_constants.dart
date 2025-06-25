@@ -64,4 +64,24 @@ class AppConstants {
   
   /// Recipe image width for desktop devices
   static const double desktopRecipeImageWidth = 400.0;
+  
+  // Input Validation Constants
+  /// Minimum length for search queries
+  static const int minSearchQueryLength = 2;
+  
+  /// Maximum length for search queries
+  static const int maxSearchQueryLength = 50;
+  
+  /// Regex pattern for valid search characters (letters, numbers, spaces, basic punctuation)
+  static const String searchQueryPattern = r'^[a-zA-Z0-9\s\-\.,&]+$';
+  
+  /// List of inappropriate/blocked search terms
+  static const List<String> blockedSearchTerms = [
+    'script',
+    'javascript',
+    'eval',
+    'alert',
+    'onload',
+    'onclick',
+  ];
 }
