@@ -12,10 +12,10 @@ So, welcome to Recipe Explorer—the app that promises to make you a master chef
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Flutter SDK 3.24.3 (latest stable version)
-- Dart SDK 3.5.3 (latest stable version)
-- Android Studio 2024.1.2 (latest ACTUALLY stable version)
-- Visual Studio 2022 (17.11.3)
+- Flutter SDK 3.32.4 (latest stable version)
+- Dart SDK 3.8.1 (latest stable version)
+- Android Studio 2024.3.2 (latest stable version)
+- Visual Studio 2022 (to build Windows app)
 
 ### Installation
 
