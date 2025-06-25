@@ -114,7 +114,7 @@ class ApiController extends GetxController {
       // Search by name if enabled
       if (searchByName) {
         final nameResponse = await searchMealsByName(query);
-        if (nameResponse.error == null) {
+        if (nameResponse.error == null && nameResponse.data != null) {
           results.addAll(nameResponse.data!);
         } else {
           return nameResponse;
@@ -124,7 +124,7 @@ class ApiController extends GetxController {
       // Search by ingredient if enabled
       if (searchByIngredient) {
         final ingredientResponse = await searchMealsByIngredient(query);
-        if (ingredientResponse.error == null) {
+        if (ingredientResponse.error == null && ingredientResponse.data != null) {
           results.addAll(ingredientResponse.data!);
         } else {
           return ingredientResponse;
