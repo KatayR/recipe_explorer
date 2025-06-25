@@ -6,11 +6,7 @@ import 'package:recipe_explorer/constants/text_constants.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
 import 'services/storage_service.dart';
-import 'services/connectivity_service.dart';
-import 'services/image_cache.dart';
-import 'services/image_preloader.dart';
-import 'services/api_service.dart';
-import 'services/favorites_service.dart';
+import 'bindings/app_bindings.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized before using platform channels
@@ -18,14 +14,6 @@ void main() async {
 
   // Initialize the FFI database
   await StorageService.initializeFfi();
-  
-  // Initialize GetX services
-  Get.put(StorageService());
-  Get.put(ConnectivityService());
-  Get.put(ImageCacheService());
-  Get.put(ImagePreloaderService());
-  Get.put(ApiController());
-  Get.put(FavoritesController());
   
   runApp(const RecipeExplorer());
 }
@@ -50,6 +38,7 @@ class RecipeExplorer extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       initialRoute: AppRoutes.home,
+      initialBinding: AppBindings(),
       getPages: AppPages.pages,
     );
   }
