@@ -33,7 +33,7 @@ class MealImageController extends GetxController {
   }
 }
 
-class MealImage extends StatefulWidget {
+class MealImage extends GetView<MealImageController> {
   final String mealId;
   final String imageUrl;
   final double? width;
@@ -52,42 +52,22 @@ class MealImage extends StatefulWidget {
   });
 
   @override
-  State<MealImage> createState() => _MealImageState();
-}
-
-class _MealImageState extends State<MealImage> {
-  late String uniqueTag;
-  late MealImageController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize controller with unique tag to avoid conflicts
-    uniqueTag = widget.controllerTag ?? '${widget.mealId}-${widget.imageUrl.hashCode}';
-    Get.put(MealImageController(), tag: uniqueTag);
-    controller = Get.find<MealImageController>(tag: uniqueTag);
-    
-    // Load image when widget is initialized
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.loadImage(widget.mealId, widget.imageUrl);
-    });
-  }
-
-  @override
-  void dispose() {
-    // Properly dispose of controller when widget is destroyed
-    Get.delete<MealImageController>(tag: uniqueTag);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initialize controller with unique tag to avoid conflicts
+    final uniqueTag = controllerTag ?? '$mealId-${imageUrl.hashCode}';
+    Get.put(MealImageController(), tag: uniqueTag);
+    final controller = Get.find<MealImageController>(tag: uniqueTag);
+    
+    // Load image when widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.loadImage(mealId, imageUrl);
+    });
     
     return Obx(() {
       if (controller.isLoading.value) {
         return SizedBox(
-          width: widget.width,
-          height: widget.height,
+          width: width,
+          height: height,
           child: const LoadingView(),
         );
       }
@@ -95,18 +75,18 @@ class _MealImageState extends State<MealImage> {
       if (controller.cachedPath.value != null) {
         return Image.file(
           File(controller.cachedPath.value!),
-          width: widget.width,
-          height: widget.height,
-          fit: widget.fit,
+          width: width,
+          height: height,
+          fit: fit,
           errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
         );
       }
 
       return Image.network(
-        widget.imageUrl,
-        width: widget.width,
-        height: widget.height,
-        fit: widget.fit,
+        imageUrl,
+        width: width,
+        height: height,
+        fit: fit,
         errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
       );
     });
@@ -115,8 +95,8 @@ class _MealImageState extends State<MealImage> {
   /// Builds a widget to display when an error occurs while loading the image.
   Widget _buildErrorWidget() {
     return Container(
-      width: widget.width,
-      height: widget.height,
+      width: width,
+      height: height,
       color: Colors.grey[300],
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
