@@ -17,15 +17,31 @@ class ResponsiveHelper {
 
   // Returns the number of grid columns based on the device type
   static int getGridCrossAxisCount(BuildContext context) {
-    if (isMobile(context)) return 1;
-    if (isTablet(context)) return 2;
-    return 3;
+    if (isMobile(context)) return UIConstants.mobileGridColumns;
+    if (isTablet(context)) return UIConstants.tabletGridColumns;
+    return UIConstants.desktopGridColumns;
   }
 
-  // Returns the aspect ratio of grid children based on the device type
-  static double getGridChildAspectRatio(BuildContext context) {
-    if (isMobile(context)) return UIConstants.mobileAspectRatio;
-    if (isTablet(context)) return UIConstants.tabletAspectRatio;
-    return UIConstants.desktopAspectRatio;
+  /// Grid delegate for meal cards laid out in [availableWidth].
+  ///
+  /// Uses a fixed row extent (square image + info block) instead of an aspect
+  /// ratio, so every card keeps the same image size regardless of title length
+  /// and the info block grows with the system text scale.
+  static SliverGridDelegate mealGridDelegate(
+    BuildContext context,
+    double availableWidth,
+  ) {
+    final columns = getGridCrossAxisCount(context);
+    final tileWidth =
+        (availableWidth - UIConstants.gridSpacing * (columns - 1)) / columns;
+    final infoHeight = MediaQuery.textScalerOf(context)
+        .scale(UIConstants.mealCardInfoHeight);
+
+    return SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: columns,
+      crossAxisSpacing: UIConstants.gridSpacing,
+      mainAxisSpacing: UIConstants.gridSpacing,
+      mainAxisExtent: tileWidth * UIConstants.mealCardImageRatio + infoHeight,
+    );
   }
 }

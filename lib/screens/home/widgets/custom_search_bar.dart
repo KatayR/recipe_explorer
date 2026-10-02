@@ -19,13 +19,13 @@
 /// )
 /// ```
 ///
-/// The filter dialog allows users to select whether to search by name, by ingredient, or both.
+/// The filter sheet allows users to select whether to search by name, by ingredient, or both.
 /// The search criteria are stored in the reactive [byName] and [byIngredient] variables.
 ///
 /// The [handleSearch] method is called when a search is performed, and it triggers the [onSearch]
 /// callback with the current search query and criteria.
 ///
-/// The [showFilterDialog] method displays a dialog with checkboxes for selecting the search criteria.
+/// The [showFilterSheet] method displays a bottom sheet with filter chips for selecting the search criteria.
 ///
 /// The text field input is managed by a [TextEditingController], which is disposed of in the [onClose] method.
 
@@ -40,25 +40,46 @@ class CustomSearchBarController extends GetxController {
   final byName = true.obs;
   final byIngredient = false.obs;
 
+  /// True when filters differ from the default (name only), so the filter button shows a dot.
+  bool get hasCustomFilters => !byName.value || byIngredient.value;
+
   @override
   void onClose() {
     textController.dispose();
     super.onClose();
   }
 
-  void handleSearch(Function(String, {bool byName, bool byIngredient}) onSearch) {
+  /// Shows validation feedback with Flutter's ScaffoldMessenger
+  /// (Get.snackbar fails with "No Overlay widget found" on current Flutter versions).
+  void _showValidationError(BuildContext context, String title, String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 2),
+            Text(message),
+          ],
+        ),
+      ));
+  }
+
+  void handleSearch(
+    BuildContext context,
+    Function(String, {bool byName, bool byIngredient}) onSearch,
+  ) {
     final query = textController.text;
     
     // Validate search query
     final queryValidation = InputValidator.validateSearchQuery(query);
     if (!queryValidation.isValid) {
-      Get.snackbar(
-        'Invalid Search',
+      _showValidationError(
+        context,
+        TextConstants.invalidSearchTitle,
         queryValidation.errorMessage!,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade100,
-        colorText: Colors.red.shade800,
-        margin: const EdgeInsets.all(16),
       );
       return;
     }
@@ -66,13 +87,10 @@ class CustomSearchBarController extends GetxController {
     // Validate search filters
     final filterValidation = InputValidator.validateSearchFilters(byName.value, byIngredient.value);
     if (!filterValidation.isValid) {
-      Get.snackbar(
-        'No Search Filter Selected',
+      _showValidationError(
+        context,
+        TextConstants.noFilterSelectedTitle,
         filterValidation.errorMessage!,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange.shade100,
-        colorText: Colors.orange.shade800,
-        margin: const EdgeInsets.all(16),
       );
       return;
     }
@@ -87,40 +105,57 @@ class CustomSearchBarController extends GetxController {
     textController.clear();
   }
 
-  void showFilterDialog(BuildContext context) {
-    Get.dialog(
-      AlertDialog(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(left: 24.0),
-              child: Text(TextConstants.filtersTitle),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18.0),
-              child: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: Get.back,
+  void showFilterSheet(BuildContext context) {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            UIConstants.sectionSpacing,
+            0,
+            UIConstants.sectionSpacing,
+            UIConstants.sectionSpacing,
+          ),
+          child: Obx(() => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(TextConstants.filtersTitle, style: theme.textTheme.titleLarge),
+              const SizedBox(height: 4),
+              Text(
+                TextConstants.filtersSubtitle,
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
-            ),
-          ],
+              const SizedBox(height: UIConstants.defaultSpacing),
+              Wrap(
+                spacing: UIConstants.defaultPadding,
+                children: [
+                  FilterChip(
+                    label: const Text(TextConstants.searchByName),
+                    selected: byName.value,
+                    onSelected: (value) => byName.value = value,
+                  ),
+                  FilterChip(
+                    label: const Text(TextConstants.searchByIngredient),
+                    selected: byIngredient.value,
+                    onSelected: (value) => byIngredient.value = value,
+                  ),
+                ],
+              ),
+              const SizedBox(height: UIConstants.sectionSpacing),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text(TextConstants.doneButton),
+                ),
+              ),
+            ],
+          )),
         ),
-        content: Obx(() => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CheckboxListTile(
-              title: const Text(TextConstants.searchByName),
-              value: byName.value,
-              onChanged: (value) => byName.value = value ?? false,
-            ),
-            CheckboxListTile(
-              title: const Text(TextConstants.searchByIngredient),
-              value: byIngredient.value,
-              onChanged: (value) => byIngredient.value = value ?? false,
-            ),
-          ],
-        )),
       ),
     );
   }
@@ -143,38 +178,27 @@ class CustomSearchBar extends GetView<CustomSearchBarController> {
     Get.put(CustomSearchBarController(), tag: uniqueTag);
     final controller = Get.find<CustomSearchBarController>(tag: uniqueTag);
     
-    return Expanded(
-      child: Material(
-        elevation: 2,
-        borderRadius: UIConstants.circularBorderRadius,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: UIConstants.circularBorderRadius,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: controller.textController,
-                  decoration: const InputDecoration(
-                    hintText: TextConstants.searchHint,
-                    prefixIcon: Icon(Icons.search),
-                    border: InputBorder.none,
-                  ),
-                  onSubmitted: (_) => controller.handleSearch(onSearch),
-                ),
-              ),
-
-              // Filter Icon Button
-              IconButton(
-                icon: const Icon(Icons.tune),
-                onPressed: () => controller.showFilterDialog(context),
-              ),
-            ],
+    return TextField(
+      controller: controller.textController,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: TextConstants.searchHint,
+        prefixIcon: const Icon(Icons.search_rounded),
+        // Filter button; shows a dot when non-default filters are active
+        suffixIcon: Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: IconButton(
+            tooltip: TextConstants.filtersTooltip,
+            icon: Obx(() => Badge(
+              smallSize: 8,
+              isLabelVisible: controller.hasCustomFilters,
+              child: const Icon(Icons.tune_rounded),
+            )),
+            onPressed: () => controller.showFilterSheet(context),
           ),
         ),
       ),
+      onSubmitted: (_) => controller.handleSearch(context, onSearch),
     );
   }
 }

@@ -77,6 +77,7 @@ class ScrollableWrapper extends StatelessWidget {
   final FloatingActionButton? existingFab;
   final bool useScaffold;
   final String? title;
+  final Widget? subtitle; // Optional secondary line under the title (e.g. a result count)
   final List<Widget>? actions;
   final String? controllerTag;
 
@@ -88,6 +89,7 @@ class ScrollableWrapper extends StatelessWidget {
     this.existingFab,
     this.useScaffold = true,
     this.title,
+    this.subtitle,
     this.actions,
     this.controllerTag,
   });
@@ -178,7 +180,21 @@ class ScrollableWrapper extends StatelessWidget {
       return Scaffold(
         appBar: title != null
             ? AppBar(
-                title: Text(title!),
+                title: subtitle == null
+                    ? Text(title!)
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(title!),
+                          DefaultTextStyle(
+                            style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                            child: subtitle!,
+                          ),
+                        ],
+                      ),
                 actions: actions,
               )
             : null,

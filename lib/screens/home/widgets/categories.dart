@@ -15,10 +15,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:ui';
-import '../../../widgets/loading/loading_view.dart';
-import '../../../widgets/error/error_view.dart';
 import '../../../services/api_service.dart';
 import '../../../constants/app_constants.dart';
+import '../../../constants/text_constants.dart';
+import '../../../constants/ui_constants.dart';
 import '../../../models/category_model.dart';
 import '../../../utils/responsive_helper.dart';
 
@@ -77,20 +77,11 @@ class CategoriesSection extends GetView<CategoriesSectionController> {
 
     return Obx(() {
       if (controller.isLoading.value) {
-        return const SizedBox(
-          height: 120,
-          child: Center(child: LoadingView()),
-        );
+        return const _CategoryListSkeleton();
       }
 
       if (controller.error.value != null) {
-        return SizedBox(
-          height: 120,
-          child: ErrorView(
-            errString: controller.error.value!,
-            onRetry: controller.loadCategories,
-          ),
-        );
+        return _CategoryError(onRetry: controller.loadCategories);
       }
 
       return CategoryList(
@@ -169,62 +160,60 @@ class CategoryList extends GetView<CategoryListController> {
     Get.put(CategoryListController(), tag: uniqueTag);
     final controller = Get.find<CategoryListController>(tag: uniqueTag);
     
-    /// Determines the height based on the device type.
-    /// If the device is mobile, the height is set to mobile value.
-    /// Otherwise, the height is set to desktop value.
-    final height = ResponsiveHelper.isMobile(context) ? AppConstants.mobileCategoryHeight : AppConstants.desktopCategoryHeight;
+    final height = _CategoryMetrics.of(context).listHeight;
+    // Scroll arrows only help pointer users on wide layouts; touch users swipe
+    final showArrows = !ResponsiveHelper.isMobile(context);
 
-    return MouseRegion(
-      child: SizedBox(
-        height: height,
-        child: Obx(() => Stack(
-          children: [
-            ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(
-                dragDevices: {
-                  PointerDeviceKind.mouse,
-                  PointerDeviceKind.touch,
-                  PointerDeviceKind.trackpad,
-                },
-                scrollbars: true,
-              ),
-              child: ListView.builder(
-                controller: controller.scrollController,
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  return CategoryItem(
-                    category: category,
-                    onTap: () => onCategorySelected(category.strCategory),
-                  );
-                },
+    return SizedBox(
+      height: height,
+      child: Obx(() => Stack(
+        children: [
+          ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              dragDevices: {
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.touch,
+                PointerDeviceKind.trackpad,
+              },
+              scrollbars: false,
+            ),
+            child: ListView.builder(
+              controller: controller.scrollController,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              physics: const BouncingScrollPhysics(),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories[index];
+                return CategoryItem(
+                  category: category,
+                  onTap: () => onCategorySelected(category.strCategory),
+                );
+              },
+            ),
+          ),
+          if (showArrows && controller.showLeftArrow.value)
+            Positioned(
+              left: 4,
+              top: 0,
+              bottom: 0,
+              child: _ScrollArrow(
+                direction: -1,
+                onTap: () => controller.scroll(-1),
               ),
             ),
-            if (controller.showLeftArrow.value)
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: _ScrollArrow(
-                  direction: -1,
-                  onTap: () => controller.scroll(-1),
-                ),
+          if (showArrows && controller.showRightArrow.value)
+            Positioned(
+              right: 4,
+              top: 0,
+              bottom: 0,
+              child: _ScrollArrow(
+                direction: 1,
+                onTap: () => controller.scroll(1),
               ),
-            if (controller.showRightArrow.value)
-              Positioned(
-                right: 0,
-                top: 0,
-                bottom: 0,
-                child: _ScrollArrow(
-                  direction: 1,
-                  onTap: () => controller.scroll(1),
-                ),
-              ),
-          ],
-        )),
-      ),
+            ),
+        ],
+      )),
     );
   }
 }
@@ -252,34 +241,16 @@ class _ScrollArrow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 26,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              begin: direction != -1
-                  ? Alignment.centerRight
-                  : Alignment.centerLeft,
-              end: direction != -1
-                  ? Alignment.centerLeft
-                  : Alignment.centerRight,
-              colors: [
-                Colors.black38,
-                Colors.grey[100]!,
-              ],
-            ),
-          ),
-          child: Center(
-            child: Icon(
-              direction == -1 ? Icons.chevron_left : Icons.chevron_right,
-              color: Colors.white,
-              size: 26,
-            ),
-          ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
+      child: IconButton.filledTonal(
+        onPressed: onTap,
+        style: IconButton.styleFrom(
+          backgroundColor: colorScheme.surfaceContainerHigh.withValues(alpha: 0.95),
+          foregroundColor: colorScheme.onSurface,
+        ),
+        icon: Icon(
+          direction == -1 ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
         ),
       ),
     );
@@ -307,37 +278,166 @@ class CategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveHelper.isDesktop(context);
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+    final theme = Theme.of(context);
+    final metrics = _CategoryMetrics.of(context);
+
+    return SizedBox(
+      width: metrics.itemWidth,
+      child: InkWell(
         onTap: onTap,
-        child: Container(
-          width: isDesktop ? AppConstants.desktopCategoryWidth : AppConstants.mobileCategoryWidth,
-          margin: const EdgeInsets.symmetric(horizontal: 8),
+        borderRadius: BorderRadius.circular(UIConstants.tileRadius),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.network(
-                category.strCategoryThumb,
-                height: isDesktop ? 70 : 50,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return SizedBox(
-                    height: isDesktop ? 70 : 50,
-                    child: const LoadingView(),
-                  );
-                },
+              _CategoryTile(
+                size: metrics.tileSize,
+                child: Image.network(
+                  category.strCategoryThumb,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.restaurant_menu_rounded,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
                 category.strCategory,
-                style: TextStyle(fontSize: isDesktop ? AppConstants.desktopCategoryTextSize : AppConstants.mobileCategoryTextSize),
+                style: theme.textTheme.labelLarge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Rounded, bordered square that frames a category thumbnail (or a placeholder).
+class _CategoryTile extends StatelessWidget {
+  final double size;
+  final Widget? child;
+
+  const _CategoryTile({required this.size, this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: size,
+      height: size,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: colorScheme.brightness == Brightness.light
+            ? colorScheme.surfaceContainerLowest
+            : colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(UIConstants.tileRadius),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.6)),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Sizes of the category strip for the current screen size and text scale.
+class _CategoryMetrics {
+  final double tileSize;
+  final double itemWidth;
+  final double listHeight;
+
+  const _CategoryMetrics(this.tileSize, this.itemWidth, this.listHeight);
+
+  factory _CategoryMetrics.of(BuildContext context) {
+    final isDesktop = ResponsiveHelper.isDesktop(context);
+    final tileSize = isDesktop
+        ? UIConstants.categoryTileSizeDesktop
+        : UIConstants.categoryTileSize;
+    final labelHeight = MediaQuery.textScalerOf(context).scale(20);
+    return _CategoryMetrics(
+      tileSize,
+      isDesktop ? UIConstants.categoryItemWidthDesktop : UIConstants.categoryItemWidth,
+      // vertical padding + tile + gap + label
+      8 + tileSize + 8 + labelHeight,
+    );
+  }
+}
+
+/// Placeholder tiles shown while categories load.
+class _CategoryListSkeleton extends StatelessWidget {
+  const _CategoryListSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final metrics = _CategoryMetrics.of(context);
+    final placeholder =
+        Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6);
+
+    return SizedBox(
+      height: metrics.listHeight,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: 8,
+        itemBuilder: (context, index) => SizedBox(
+          width: metrics.itemWidth,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              children: [
+                _CategoryTile(size: metrics.tileSize),
+                const SizedBox(height: 8),
+                Container(
+                  width: metrics.tileSize * 0.7,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: placeholder,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Compact inline error for the categories strip.
+class _CategoryError extends StatelessWidget {
+  final VoidCallback onRetry;
+
+  const _CategoryError({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: UIConstants.pagePadding),
+      child: Row(
+        children: [
+          Icon(
+            Icons.cloud_off_rounded,
+            color: theme.colorScheme.error,
+            size: UIConstants.smallIconSize,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              TextConstants.categoriesLoadError,
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+          TextButton(
+            onPressed: onRetry,
+            child: const Text(TextConstants.tryAgainButton),
+          ),
+        ],
       ),
     );
   }

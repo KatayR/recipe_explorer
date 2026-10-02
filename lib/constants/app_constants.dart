@@ -33,38 +33,6 @@ class AppConstants {
   /// Default timeout for network requests in seconds
   static const int networkTimeoutSeconds = 5;
   
-  // Responsive Design Breakpoints (extracted from magic numbers in UI)
-  /// Mobile category list height
-  static const double mobileCategoryHeight = 100.0;
-  
-  /// Desktop category list height  
-  static const double desktopCategoryHeight = 120.0;
-  
-  /// Mobile category item width
-  static const double mobileCategoryWidth = 90.0;
-  
-  /// Desktop category item width
-  static const double desktopCategoryWidth = 150.0;
-  
-  /// Mobile category text size
-  static const double mobileCategoryTextSize = 12.0;
-  
-  /// Desktop category text size
-  static const double desktopCategoryTextSize = 14.0;
-  
-  // Widget Dimensions (frequently used magic numbers)
-  /// Standard icon size for small icons
-  static const double smallIconSize = 20.0;
-  
-  /// Recipe image height for mobile devices
-  static const double mobileRecipeImageHeight = 200.0;
-  
-  /// Recipe image height for desktop devices  
-  static const double desktopRecipeImageHeight = 400.0;
-  
-  /// Recipe image width for desktop devices
-  static const double desktopRecipeImageWidth = 400.0;
-  
   // Input Validation Constants
   /// Minimum length for search queries
   static const int minSearchQueryLength = 2;

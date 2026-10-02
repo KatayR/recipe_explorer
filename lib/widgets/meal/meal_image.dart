@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../constants/text_constants.dart';
 import '../../services/image_cache.dart';
-import '../loading/loading_view.dart';
 
 class MealImageController extends GetxController {
   final ImageCacheService _imageCacheService = Get.find<ImageCacheService>();
@@ -63,12 +62,15 @@ class MealImage extends GetView<MealImageController> {
       controller.loadImage(mealId, imageUrl);
     });
     
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Obx(() {
       if (controller.isLoading.value) {
-        return SizedBox(
+        // Neutral placeholder instead of a spinner, matching the grid cards
+        return Container(
           width: width,
           height: height,
-          child: const LoadingView(),
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
         );
       }
 
@@ -78,7 +80,7 @@ class MealImage extends GetView<MealImageController> {
           width: width,
           height: height,
           fit: fit,
-          errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+          errorBuilder: (context, error, stackTrace) => _buildErrorWidget(context),
         );
       }
 
@@ -87,23 +89,31 @@ class MealImage extends GetView<MealImageController> {
         width: width,
         height: height,
         fit: fit,
-        errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+        errorBuilder: (context, error, stackTrace) => _buildErrorWidget(context),
       );
     });
   }
 
   /// Builds a widget to display when an error occurs while loading the image.
-  Widget _buildErrorWidget() {
+  Widget _buildErrorWidget(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: width,
       height: height,
-      color: Colors.grey[300],
-      child: const Column(
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error, color: Colors.red),
-          SizedBox(height: 8),
-          Text(TextConstants.imageLoadError),
+          Icon(
+            Icons.image_not_supported_outlined,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            TextConstants.imageLoadError,
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
         ],
       ),
     );

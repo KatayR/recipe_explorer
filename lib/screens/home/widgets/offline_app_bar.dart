@@ -1,36 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_explorer/constants/ui_constants.dart';
 import '../../../constants/text_constants.dart';
-import 'favorites_button.dart';
+import 'home_header.dart';
 
-class OfflineAppBar extends StatelessWidget implements PreferredSizeWidget {
+/// Home header shown while offline; keeps the favorites entry point reachable.
+class OfflineAppBar extends StatelessWidget {
   const OfflineAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: UIConstants.offlineAppBarHeight,
-      color: Theme.of(context).appBarTheme.backgroundColor,
-      padding: const EdgeInsets.all(UIConstants.defaultPadding),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              TextConstants.offlineFavoritesHint,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: UIConstants.titleFontSize,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).appBarTheme.foregroundColor,
-              ),
-            ),
-          ),
-          const FavoritesButton(),
-        ],
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(
+        UIConstants.pagePadding,
+        UIConstants.doublePadding,
+        UIConstants.pagePadding,
+        0,
       ),
+      child: HomeHeader(headline: TextConstants.offlineHeadline),
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

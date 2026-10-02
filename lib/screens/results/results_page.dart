@@ -8,7 +8,7 @@
 /// to be performed when a [searchQuery] is provided.
 ///
 /// The [ResultsPage] consists of the following main components:
-/// - An app bar displaying the search query or category name.
+/// - An app bar displaying the search query or category name, with a result count.
 /// - A body that displays a loading indicator, error message, or the list of meals.
 ///
 /// The meals are fetched using the [ApiService].
@@ -41,8 +41,8 @@ import '../../../services/scroll_preloader.dart';
 import '../../models/meal_model.dart';
 import '../../widgets/connectivity/connected_wrapper.dart';
 import '../../widgets/error/error_view.dart';
-import '../../widgets/loading/loading_view.dart';
 import '../../widgets/meal/meal_grid.dart';
+import '../../widgets/state/empty_state_view.dart';
 import '../../widgets/scroll/scrollable_wrapper.dart';
 import '../../routes/app_routes.dart';
 
@@ -103,9 +103,9 @@ class ResultsPageController extends GetxController {
 
   String getPageTitle() {
     if (searchQuery != null) {
-      return '${TextConstants.searchResultsTitle}: $searchQuery';
+      return '“$searchQuery”';
     } else if (categoryName != null) {
-      return '${TextConstants.categoryResultsTitle}: $categoryName';
+      return categoryName!;
     }
     return TextConstants.genericResultsTitle;
   }
@@ -175,7 +175,7 @@ class ResultsPage extends GetView<ResultsPageController> {
     Widget buildContent() {
       return Obx(() {
         if (controller.isLoading.value) {
-          return const LoadingView();
+          return const MealGridSkeleton();
         }
 
         if (controller.error.value != null) {
@@ -186,8 +186,10 @@ class ResultsPage extends GetView<ResultsPageController> {
         }
 
         if (controller.meals.isEmpty) {
-          return const ErrorView(
-            errString: TextConstants.noResultsError,
+          return const EmptyStateView(
+            icon: Icons.search_off_rounded,
+            title: TextConstants.noResultsError,
+            message: TextConstants.noResultsMessage,
           );
         }
 
@@ -210,12 +212,21 @@ class ResultsPage extends GetView<ResultsPageController> {
         title: controller.getPageTitle(),
         child: ErrorView(
           errString: TextConstants.noInternetError,
+          message: TextConstants.offlineMessage,
+          icon: Icons.wifi_off_rounded,
           onRetry: retryCallback,
         ),
       ),
       child: ScrollableWrapper(
         controller: scrollController,
         title: controller.getPageTitle(),
+        subtitle: Obx(() => Text(
+              controller.isLoading.value ||
+                      controller.error.value != null ||
+                      controller.meals.isEmpty
+                  ? ''
+                  : TextConstants.recipeCount(controller.meals.length),
+            )),
         child: buildContent(),
       ),
     );

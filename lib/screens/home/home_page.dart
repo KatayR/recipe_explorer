@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:recipe_explorer/screens/home/widgets/favorites_button.dart';
 import 'package:recipe_explorer/widgets/connectivity/connected_wrapper.dart';
 import '../../constants/text_constants.dart';
 import '../../constants/ui_constants.dart';
 import '../../widgets/error/error_view.dart';
+import '../../widgets/section_header.dart';
 import '../../routes/app_routes.dart';
+import 'widgets/home_header.dart';
 import 'widgets/offline_app_bar.dart';
 import 'widgets/categories.dart';
 import 'widgets/custom_search_bar.dart';
@@ -43,18 +44,22 @@ class HomePage extends GetView<HomePageController> {
     // Initialize controller only if not already created
     Get.lazyPut(() => HomePageController());
 
+    const horizontalPadding =
+        EdgeInsets.symmetric(horizontal: UIConstants.pagePadding);
+
     return Scaffold(
       body: SafeArea(
+        bottom: false,
         child: ConnectivityWrapper(
           errorBuilder: (retryCallback) => Column(
             children: [
               const OfflineAppBar(),
               Expanded(
-                child: Center(
-                  child: ErrorView(
-                    errString: TextConstants.loadError,
-                    onRetry: retryCallback,
-                  ),
+                child: ErrorView(
+                  errString: TextConstants.noInternetError,
+                  message: TextConstants.offlineMessage,
+                  icon: Icons.wifi_off_rounded,
+                  onRetry: retryCallback,
                 ),
               ),
             ],
@@ -63,26 +68,35 @@ class HomePage extends GetView<HomePageController> {
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
               SliverToBoxAdapter(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        UIConstants.pagePadding,
+                        UIConstants.doublePadding,
+                        UIConstants.pagePadding,
+                        UIConstants.doublePadding,
+                      ),
+                      child: HomeHeader(),
+                    ),
                     Padding(
-                      padding: const EdgeInsets.all(UIConstants.defaultPadding),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          CustomSearchBar(
-                            onSearch: (query, {bool byName = true, bool byIngredient = false}) =>
-                                controller.searchMeals(query,
-                                    byName: byName, byIngredient: byIngredient),
-                          ),
-                          const SizedBox(width: 8),
-                          const FavoritesButton(),
-                        ],
+                      padding: horizontalPadding,
+                      child: CustomSearchBar(
+                        onSearch: (query, {bool byName = true, bool byIngredient = false}) =>
+                            controller.searchMeals(query,
+                                byName: byName, byIngredient: byIngredient),
                       ),
                     ),
+                    const SizedBox(height: UIConstants.sectionSpacing),
+                    const Padding(
+                      padding: horizontalPadding,
+                      child: SectionHeader(title: TextConstants.categoriesTitle),
+                    ),
+                    const SizedBox(height: 12),
                     CategoriesSection(
                       onCategorySelected: controller.onCategorySelected,
                     ),
-                    const Divider(),
+                    const SizedBox(height: UIConstants.defaultSpacing),
                   ],
                 ),
               ),

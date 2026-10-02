@@ -18,12 +18,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:recipe_explorer/constants/text_constants.dart';
-import 'package:recipe_explorer/constants/ui_constants.dart';
-import 'package:recipe_explorer/widgets/loading/loading_view.dart';
 import '../../../services/favorites_service.dart';
 import '../../../services/scroll_preloader.dart';
 import '../../models/meal_model.dart';
 import '../../widgets/meal/meal_grid.dart';
+import '../../widgets/state/empty_state_view.dart';
 import '../../widgets/scroll/scrollable_wrapper.dart';
 import '../../routes/app_routes.dart';
 
@@ -67,37 +66,18 @@ class FavoritesPage extends GetView<FavoritesController> {
 
     Widget buildContent() {
       return Obx(() {
-        if (controller.isLoading.value) {
-          return const LoadingView();
+        // Skeleton only on first load; refreshes after returning keep the current grid
+        if (controller.isLoading.value && controller.favorites.isEmpty) {
+          return const MealGridSkeleton(itemCount: 4);
         }
 
         if (controller.favorites.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.favorite_border,
-                  size: 64,
-                  color: Colors.grey,
-                ),
-                SizedBox(height: UIConstants.defaultSpacing),
-                Text(
-                  TextConstants.noFavoritesMessage,
-                  style: TextStyle(
-                    fontSize: UIConstants.bodyFontSize,
-                    color: Colors.grey,
-                  ),
-                ),
-                SizedBox(height: UIConstants.defaultPadding),
-                Text(
-                  TextConstants.addFavoritesMessage,
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
+          return EmptyStateView(
+            icon: Icons.favorite_border_rounded,
+            title: TextConstants.noFavoritesMessage,
+            message: TextConstants.addFavoritesMessage,
+            actionLabel: TextConstants.browseRecipesButton,
+            onAction: () => Get.back(),
           );
         }
 
@@ -120,6 +100,11 @@ class FavoritesPage extends GetView<FavoritesController> {
     return ScrollableWrapper(
       controller: scrollController,
       title: TextConstants.favoritesTitle,
+      subtitle: Obx(() => Text(
+            controller.favorites.isEmpty
+                ? ''
+                : TextConstants.savedRecipeCount(controller.favorites.length),
+          )),
       child: buildContent(),
     );
   }

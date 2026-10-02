@@ -13,7 +13,8 @@
 /// The widget consists of:
 /// - A title indicating the type of dishes being displayed.
 /// - Reactive state management with GetX for loading/error states
-/// - A `LoadingView` that is displayed while the data is being fetched.
+/// - A `MealGridSkeleton` that is displayed while the data is being fetched.
+/// - An `ErrorView` with retry when the fetch fails.
 /// - A `MealGrid` that displays the fetched meals in a grid format.
 ///
 /// When a meal is selected from the grid, the user is navigated to the `RecipePage`
@@ -25,8 +26,9 @@ import 'package:recipe_explorer/constants/text_constants.dart';
 import 'package:recipe_explorer/constants/ui_constants.dart';
 import '../../../services/api_service.dart';
 import '../../../services/scroll_preloader.dart';
-import '../../../widgets/loading/loading_view.dart';
+import '../../../widgets/error/error_view.dart';
 import '../../../widgets/meal/meal_grid.dart';
+import '../../../widgets/section_header.dart';
 import '../../../widgets/scroll/scrollable_wrapper.dart';
 import '../../../routes/app_routes.dart';
 
@@ -35,6 +37,7 @@ class DefaultRecipesSectionController extends GetxController {
 
   var meals = <dynamic>[].obs;
   var isLoading = true.obs;
+  var hasError = false.obs;
   
   @override
   void onInit() {
@@ -45,12 +48,15 @@ class DefaultRecipesSectionController extends GetxController {
   Future<void> loadMeals() async {
     try {
       isLoading.value = true;
+      hasError.value = false;
       final response = await _apiController.getMealsByCategory('Chicken');
       if (response.data != null) {
         meals.value = response.data!;
       }
+      hasError.value = response.error != null || meals.isEmpty;
       isLoading.value = false;
     } catch (e) {
+      hasError.value = true;
       isLoading.value = false;
       debugPrint('Error loading meals: $e');
     }
@@ -93,16 +99,28 @@ class DefaultRecipesSection extends GetView<DefaultRecipesSectionController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: EdgeInsets.all(UIConstants.defaultPadding),
-          child: Text(
-            TextConstants.defaultCategoryTitle,
-            style: TextStyle(fontWeight: FontWeight.bold),
+          padding: EdgeInsets.fromLTRB(
+            UIConstants.pagePadding,
+            0,
+            UIConstants.pagePadding,
+            UIConstants.defaultPadding,
+          ),
+          child: SectionHeader(
+            title: TextConstants.defaultCategoryTitle,
+            subtitle: TextConstants.defaultCategorySubtitle,
           ),
         ),
         Expanded(
           child: Obx(() {
             if (controller.isLoading.value) {
-              return const LoadingView();
+              return const MealGridSkeleton();
+            }
+
+            if (controller.hasError.value) {
+              return ErrorView(
+                errString: TextConstants.defaultCategoryError,
+                onRetry: controller.loadMeals,
+              );
             }
 
             // Initialize preloading when meals are available

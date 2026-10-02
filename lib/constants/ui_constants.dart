@@ -1,36 +1,44 @@
-import 'package:flutter/material.dart';
-
+/// Layout, sizing and spacing constants shared by the UI layer.
 class UIConstants {
-  // Grid configuration
+  // Breakpoints
   static const double mobileMaxWidth = 600;
   static const double tabletMaxWidth = 1200;
-  static const int mobileGridColumns = 1;
-  static const int tabletGridColumns = 2;
-  static const int desktopGridColumns = 3;
-  static const double mobileAspectRatio = 0.85;
-  static const double tabletAspectRatio = 0.75;
-  static const double desktopAspectRatio = 0.7;
+
+  // Meal grid
+  static const int mobileGridColumns = 2;
+  static const int tabletGridColumns = 3;
+  static const int desktopGridColumns = 4;
+  static const double gridSpacing = 12.0;
+
+  /// Image height / tile width on meal cards (1.0 = square, matching TheMealDB thumbs).
+  static const double mealCardImageRatio = 1.0;
+
+  /// Height reserved under the image for title (2 lines) + cuisine chip, before text scaling.
+  static const double mealCardInfoHeight = 96.0;
 
   // Padding and spacing
   static const double defaultPadding = 8.0;
   static const double doublePadding = 16.0;
+  static const double pagePadding = 20.0;
   static const double defaultSpacing = 16.0;
-  static const double cardElevation = 2.0;
+  static const double sectionSpacing = 24.0;
 
-  // Image dimensions
-  static const double categoryImageHeight = 70.0;
-  static const double categoryImageHeightMobile = 50.0;
-  static const double recipeImageHeight = 400.0;
-  static const double recipeImageHeightMobile = 200.0;
+  // Radii
+  static const double cardRadius = 16.0;
+  static const double tileRadius = 20.0;
+  static const double pillRadius = 28.0;
 
-  // Font sizes
-  static const double titleFontSize = 18.0;
-  static const double subtitleFontSize = 16.0;
-  static const double bodyFontSize = 14.0;
-  static const double categoryTextSize = 14.0;
-  static const double categoryTextSizeMobile = 12.0;
+  // Categories strip
+  static const double categoryTileSize = 88.0;
+  static const double categoryTileSizeDesktop = 112.0;
+  static const double categoryItemWidth = 104.0;
+  static const double categoryItemWidthDesktop = 132.0;
+
+  // Recipe page
+  static const double recipeHeroHeight = 320.0;
+  static const double recipeHeroHeightWide = 420.0;
+  static const double recipeContentMaxWidth = 1040.0;
 
   // Misc
-  static BorderRadius circularBorderRadius = BorderRadius.circular(14);
-  static const double offlineAppBarHeight = 64.4;
+  static const double smallIconSize = 20.0;
 }

@@ -6,6 +6,7 @@ import 'package:recipe_explorer/widgets/error/error_view.dart';
 import '../../../services/api_service.dart';
 import '../../../services/favorites_service.dart';
 import '../../models/meal_model.dart';
+import '../../utils/responsive_helper.dart';
 import '../../widgets/loading/loading_view.dart';
 import 'widgets/instructions.dart';
 import 'widgets/header.dart';
@@ -19,6 +20,9 @@ class RecipePageController extends GetxController {
   var meal = Rx<Meal?>(null);
   var isLoading = true.obs;
   var error = Rx<String?>(null);
+
+  /// Whether the hero header is scrolled into its collapsed (toolbar) state.
+  final isCollapsed = false.obs;
 
   String get mealId => _mealId;
   String get mealName => _mealName;
@@ -89,36 +93,22 @@ class RecipePage extends GetView<RecipePageController> {
     final controller = Get.find<RecipePageController>(tag: mealId);
     controller.initialize(mealId, mealName);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(mealName),
-        actions: [
-          Obx(() {
-            if (controller.meal.value != null) {
-              return IconButton(
-                icon: Icon(
-                  controller.isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: controller.isFavorite ? Colors.red : null,
-                ),
-                onPressed: controller.toggleFavorite,
-              );
-            }
-            return const SizedBox.shrink();
-          }),
-        ],
-      ),
-      body: Obx(() => _buildBody(controller)),
-    );
+    return Obx(() {
+      final meal = controller.meal.value;
+      if (controller.isLoading.value ||
+          controller.error.value != null ||
+          meal == null) {
+        return Scaffold(
+          appBar: AppBar(title: Text(mealName)),
+          body: _buildState(controller),
+        );
+      }
+      return _buildDetail(context, controller, meal);
+    });
   }
 
-  /// Builds the body of the page.
-  ///
-  /// This method returns different widgets based on the current state:
-  /// - A loading indicator if the data is being fetched.
-  /// - An error view if an error occurred during the fetch.
-  /// - A message indicating no meal details are available if the meal is null.
-  /// - The meal details if the meal is successfully fetched.
-  Widget _buildBody(RecipePageController controller) {
+  /// Builds the loading / error / empty states shown before a meal is available.
+  Widget _buildState(RecipePageController controller) {
     if (controller.isLoading.value) {
       return const LoadingView();
     }
@@ -130,34 +120,104 @@ class RecipePage extends GetView<RecipePageController> {
       );
     }
 
-    if (controller.meal.value == null) {
-      return const Center(child: Text(TextConstants.noMealDetailsError));
-    }
+    return const Center(child: Text(TextConstants.noMealDetailsError));
+  }
 
-    final meal = controller.meal.value!;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(UIConstants.doublePadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          RecipeHeader(
-            mealId: meal.idMeal,
-            imageUrl: meal.strMealThumb,
-            ingredientsSection: RecipeIngredientsSection(
-              ingredients: meal.ingredients,
-              measures: meal.measures,
+  /// Builds the recipe itself: collapsing photo header, title, meta chips,
+  /// then ingredients and steps (side by side on wide screens).
+  Widget _buildDetail(
+    BuildContext context,
+    RecipePageController controller,
+    Meal meal,
+  ) {
+    final theme = Theme.of(context);
+    final isWide = !ResponsiveHelper.isMobile(context);
+    final heroHeight =
+        isWide ? UIConstants.recipeHeroHeightWide : UIConstants.recipeHeroHeight;
+    // Scroll offset at which the pinned toolbar fully covers the photo
+    final collapseOffset =
+        heroHeight - kToolbarHeight - MediaQuery.paddingOf(context).top;
+
+    final ingredients = RecipeIngredientsSection(
+      ingredients: meal.ingredients,
+      measures: meal.measures,
+    );
+    final instructions = RecipeInstructionsSection(
+      instructions: meal.strInstructions,
+    );
+
+    return Scaffold(
+      // Scroll notifications track user scrolling; metrics notifications cover
+      // size changes (rotation/resizing) that move the offset without a scroll.
+      body: NotificationListener<Notification>(
+        onNotification: (notification) {
+          final ScrollMetrics? metrics = switch (notification) {
+            ScrollNotification(depth: 0) => notification.metrics,
+            ScrollMetricsNotification(depth: 0) => notification.metrics,
+            _ => null,
+          };
+          if (metrics != null) {
+            controller.isCollapsed.value = metrics.pixels > collapseOffset;
+          }
+          return false;
+        },
+        child: CustomScrollView(
+          slivers: [
+            RecipeHeader(
+              mealId: meal.idMeal,
+              imageUrl: meal.strMealThumb,
+              title: meal.strMeal,
+              expandedHeight: heroHeight,
+              isCollapsed: controller.isCollapsed,
+              isFavorite: () => controller.isFavorite,
+              onToggleFavorite: controller.toggleFavorite,
             ),
-          ),
-          const SizedBox(height: UIConstants.defaultSpacing),
-          RecipeInstructionsSection(
-            instructions: meal.strInstructions,
-          ),
-          const SizedBox(height: UIConstants.defaultSpacing),
-          RecipeMetadataSection(
-            category: meal.strCategory,
-            area: meal.strArea,
-          ),
-        ],
+            SliverToBoxAdapter(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: UIConstants.recipeContentMaxWidth,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      UIConstants.pagePadding,
+                      UIConstants.sectionSpacing,
+                      UIConstants.pagePadding,
+                      UIConstants.sectionSpacing +
+                          MediaQuery.paddingOf(context).bottom,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(meal.strMeal, style: theme.textTheme.headlineSmall),
+                        const SizedBox(height: 12),
+                        RecipeMetadataSection(
+                          category: meal.strCategory,
+                          area: meal.strArea,
+                        ),
+                        const SizedBox(height: 28),
+                        if (isWide)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(flex: 2, child: ingredients),
+                              const SizedBox(width: 40),
+                              Expanded(flex: 3, child: instructions),
+                            ],
+                          )
+                        else ...[
+                          ingredients,
+                          const SizedBox(height: 32),
+                          instructions,
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

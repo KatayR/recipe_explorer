@@ -7,6 +7,7 @@ import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
 import 'services/storage_service.dart';
 import 'bindings/app_bindings.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized before using platform channels
@@ -14,7 +15,7 @@ void main() async {
 
   // Initialize the FFI database
   await StorageService.initializeFfi();
-  
+
   runApp(const RecipeExplorer());
 }
 
@@ -34,9 +35,9 @@ class RecipeExplorer extends StatelessWidget {
         },
       ),
       title: TextConstants.appTitle,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       initialRoute: AppRoutes.home,
       initialBinding: AppBindings(),
       getPages: AppPages.pages,
